@@ -3,7 +3,7 @@ from matplotlib import pyplot
 from statsmodels.graphics.tsaplots import plot_acf
 
 # Load the dataset
-series = read_csv('../../datasets/daily-minimum-temperatures.csv', header=0, index_col=0)
+series = read_csv('../../data/datasets/daily-minimum-temperatures.csv', header=0, index_col=0)
 series.plot()
 pyplot.show()
 

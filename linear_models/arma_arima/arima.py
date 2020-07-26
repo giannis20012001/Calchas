@@ -2,6 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import statsmodels.api as sm
+# Importing all the required functions
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.tsa.stattools import acf
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.arima_model import ARMA
+from statsmodels.graphics.tsaplots import plot_pacf
 
 # Importing the dataset
 dataset_train = sm.datasets.sunspots.load_pandas().data
@@ -10,13 +16,6 @@ training_set = dataset_train.iloc[:, 1:2]
 training_set.index = pd.DatetimeIndex(start='1700', end='2009', freq='A')
 # visualising the plot
 training_set.plot()
-
-# Importing all the required functions
-from statsmodels.graphics.tsaplots import plot_acf
-from statsmodels.tsa.stattools import acf
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.tsa.arima_model import ARMA
-from statsmodels.graphics.tsaplots import plot_pacf
 
 # plotting the ACF
 plot_acf(training_set, lags=20, alpha=0.05)
