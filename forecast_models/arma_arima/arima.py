@@ -23,8 +23,8 @@ plot_acf(training_set, lags=20, alpha=0.05)
 # extracting ACF values
 acf_array = acf(training_set)
 
-# Run the ADF test on the price series and print out the results
-'''Augmented dickey fuller test
+# Run the ADF db_models on the price series and print out the results
+'''Augmented dickey fuller db_models
 Null hypothesis : There is a unit root in the time series sample
 Alternative Hypothesis : The series doesn't have a unit root., The series is stationary.'''
 

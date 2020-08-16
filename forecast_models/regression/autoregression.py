@@ -18,7 +18,7 @@ model = AutoReg(train, lags=29)
 model_fit = model.fit()
 coef = model_fit.params
 
-# walk forward over time steps in test
+# walk forward over time steps in db_models
 history = train[len(train) - window:]
 history = [history[i] for i in range(len(history))]
 predictions = list()
