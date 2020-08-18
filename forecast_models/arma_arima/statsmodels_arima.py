@@ -16,6 +16,7 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, m
 
 import pandas as pd
 
+
 def evaluate_forecast(y, pred):
     results = pd.DataFrame({'r2_score': r2_score(y, pred),
                             }, index=[0])
