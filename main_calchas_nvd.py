@@ -9,7 +9,6 @@ from glob import glob
 from os import listdir
 from db_models import *
 from os.path import isfile, join
-from sqlalchemy.sql import text
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -165,15 +164,15 @@ def fill_data_to_main_tables(cve_items_dict):
 
     while True:
         try:
-            choice = int(input("Enter 1 fot filling table cve_items...\n"
-                               "Enter 2 fot filling table microsoft_application_server...\n"
-                               "Enter 3 fot filling table microsoft_database_server...\n"
-                               "Enter 4 fot filling table microsoft_mail_server...\n"
-                               "Enter 5 fot filling table openstack_compute_server...\n"
-                               "Enter 6 fot filling table openstack_controller_server...\n"
-                               "Enter 7 fot filling table ubuntu_application_server...\n"
-                               "Enter 8 fot filling table ubuntu_database_server...\n"
-                               "Enter 9 fot filling table ubuntu_mail_server...\n"
+            choice = int(input("Enter 1 for filling table cve_items...\n"
+                               "Enter 2 for filling table microsoft_application_server...\n"
+                               "Enter 3 for filling table microsoft_database_server...\n"
+                               "Enter 4 for filling table microsoft_mail_server...\n"
+                               "Enter 5 for filling table openstack_compute_server...\n"
+                               "Enter 6 for filling table openstack_controller_server...\n"
+                               "Enter 7 for filling table ubuntu_application_server...\n"
+                               "Enter 8 for filling table ubuntu_database_server...\n"
+                               "Enter 9 for filling table ubuntu_mail_server...\n"
                                "Enter -1 to exit third step subroutine execution...\n"))
         except ValueError:
             print("You entered a wrong choice...\n\n")
@@ -271,25 +270,134 @@ def fill_data_to_main_tables(cve_items_dict):
                 connection.execute(query)
             elif choice == 3:
                 # Fill data to table microsoft_database_server
-                print(choice)
+                print("Filling data in microsoft_database_server table...")
+                query = "INSERT INTO microsoft_database_server " \
+                        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+                        "FROM cve_items " \
+                        "where LOWER(vulnerable_software_list) LIKE '%mcafee%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%microsoft%windows%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%microsoft%active%directory%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%microsoft%sql%server%' " \
+                        "ORDER BY pdate;"
+                connection = engine.connect()
+                connection.execute(query)
             elif choice == 4:
                 # Fill data to table microsoft_mail_server
-                print(choice)
+                print("Filling data in microsoft_mail_server table...")
+                query = "INSERT INTO microsoft_mail_server " \
+                        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+                        "FROM cve_items " \
+                        "where LOWER(vulnerable_software_list) LIKE '%mcafee%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%microsoft%windows%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%microsoft%active%directory%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%microsoft%exchange%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%spamassassin%' " \
+                        "ORDER BY pdate; "
+                connection = engine.connect()
+                connection.execute(query)
             elif choice == 5:
                 # Fill data to table openstack_compute_server
-                print(choice)
+                print("Filling data in openstack_compute_server table...")
+                query = "INSERT INTO openstack_compute_server " \
+                        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+                        "FROM cve_items " \
+                        "WHERE LOWER(vulnerable_software_list) LIKE '%linux_kernel:4%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%linux_kernel:5%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%iptables%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ubuntu%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ntp%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%fail2ban%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%nova%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%neutron%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%ceilometer%' " \
+                        "ORDER BY pdate;"
+                connection = engine.connect()
+                connection.execute(query)
             elif choice == 6:
                 # Fill data to table openstack_controller_server
-                print(choice)
+                print("Filling data in openstack_controller_server table...")
+                query = "INSERT INTO openstack_controller_server " \
+                        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+                        "FROM cve_items " \
+                        "where LOWER(vulnerable_software_list) LIKE '%linux_kernel:4%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%linux_kernel:5%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%mysql:5.7%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%mysql:8%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%iptables%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%apache2%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%memcached%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%mongodb%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ntp%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%rabbitmq%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%fail2ban%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ubuntu%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%keystone%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%glance%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%nova%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%neutron%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%ceilometer%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%openstack%horizon%' " \
+                        "ORDER BY pdate;"
+                connection = engine.connect()
+                connection.execute(query)
             elif choice == 7:
                 # Fill data to table ubuntu_application_server
-                print(choice)
+                print("Filling data in ubuntu_application_server table...")
+                query = "INSERT INTO ubuntu_application_server " \
+                        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+                        "FROM cve_items " \
+                        "where LOWER(vulnerable_software_list) LIKE '%linux_kernel%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%iptables%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%apache2%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ntp%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%fail2ban%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ubuntu%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%jboss%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%clamav%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ufw%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ldap%' " \
+                        "ORDER BY pdate;"
+                connection = engine.connect()
+                connection.execute(query)
             elif choice == 8:
                 # Fill data to table ubuntu_database_server
-                print(choice)
+                print("Filling data in ubuntu_database_server table...")
+                query = "INSERT INTO ubuntu_database_server " \
+                        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+                        "FROM cve_items " \
+                        "where LOWER(vulnerable_software_list) LIKE '%linux_kernel%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%iptables%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ntp%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%fail2ban%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ubuntu%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%clamav%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ufw%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%mysql%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%postgres%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%mongodb%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ldap%' " \
+                        "ORDER BY pdate;"
+                connection = engine.connect()
+                connection.execute(query)
             elif choice == 9:
                 # Fill data to table ubuntu_mail_server
-                print(choice)
+                print("Filling data in ubuntu_mail_server table...")
+                query = "INSERT INTO ubuntu_mail_server " \
+                        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+                        "FROM cve_items " \
+                        "where LOWER(vulnerable_software_list) LIKE '%linux_kernel%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%iptables%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ntp%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%fail2ban%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ubuntu%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%clamav%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ufw%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%ldap%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%zimbra%' " \
+                        "or LOWER(vulnerable_software_list) LIKE '%spamassassin%' " \
+                        "ORDER BY pdate;"
+                connection = engine.connect()
+                connection.execute(query)
             elif choice == -1:
                 print("Exiting current third step subroutine execution...\n\n")
                 break
@@ -299,39 +407,260 @@ def fill_data_to_main_tables(cve_items_dict):
     print("Data entry to main tables has finished...\n\n")
 
 
-def fill_data_to_sub_tables(cve_items_dict):
+def fill_data_to_sub_tables():
+    # TODO: Add check if tables are full or not.
     print("Fill data to sub tables...")
+    engine, session = sqlalchemy_engine_start()
+
     # Fill data to table active_directory
+    query = "INSERT INTO active_directory " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%microsoft%active%directory%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table apache
+    query = "INSERT INTO apache " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%apache2%' " \
+            "OR LOWER(vulnerable_software_list) LIKE '%apache%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table clamav
+    query = "INSERT INTO clamav " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%clamav%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table dot_Net
+    query = "INSERT INTO dot_Net " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%.net%framework%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table fail2ban
+    query = "INSERT INTO fail2ban " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%fail2ban%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table iis
+    query = "INSERT INTO iis " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%microsoft%iis%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table iptables
+    query = "INSERT INTO iptables " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%iptables%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table java
+    query = "INSERT INTO java " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%java%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table jboss
+    query = "INSERT INTO jboss " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%jboss%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table ldap
+    query = "INSERT INTO ldap " \
+        "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+        "FROM cve_items " \
+        "WHERE LOWER(vulnerable_software_list) LIKE '%ldap%' " \
+        "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table linux_kernel
+    query = "INSERT INTO linux_kernel " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%linux_kernel%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table mcafee
+    query = "INSERT INTO mcafee " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%mcafee%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table memcached
+    query = "INSERT INTO memcached " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%memcached%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table microsoft_exchange
+    query = "INSERT INTO microsoft_exchange " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%microsoft%exchange%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table microsoft_sql_server
+    query = "INSERT INTO microsoft_sql_server " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%microsoft%sql%server%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table mongodb
+    query = "INSERT INTO mongodb " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%mongodb%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table mysql
+    query = "INSERT INTO mysql " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%mysql%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table ntp
+    query = "INSERT INTO ntp " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%ntp%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table openstack_ceilometer
+    query = "INSERT INTO openstack_ceilometer " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%openstack%ceilometer%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table openstack_glance
+    query = "INSERT INTO openstack_glance " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%openstack%glance%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table openstack_horizon
+    query = "INSERT INTO openstack_horizon " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%openstack%horizon%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table openstack_keystone
+    query = "INSERT INTO openstack_keystone " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%openstack%keystone%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table openstack_neutron
+    query = "INSERT INTO openstack_neutron " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%openstack%neutron%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table openstack_nova
+    query = "INSERT INTO openstack_nova " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%openstack%nova%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table postgres
+    query = "INSERT INTO postgres " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%postgres%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table rabbitmq
+    query = "INSERT INTO rabbitmq " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%rabbitmq%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table spamassassin
+    query = "INSERT INTO spamassassin " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%spamassassin%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table ubuntu_os
+    query = "INSERT INTO ubuntu_os " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%ubuntu%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table ufw
+    query = "INSERT INTO ufw " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%ufw%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table windows_os
+    query = "INSERT INTO windows_os " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist " \
+            "FROM cve_items " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%microsoft%windows%' " \
+            "ORDER BY pdate;"
+    connection = engine.connect()
+    connection.execute(query)
     # Fill data to table zimbra
+    query = "INSERT INTO zimbra " \
+            "SELECT cve_id, score,date(published_datetime) AS pdate, vulnerable_software_list AS vlist  " \
+            "FROM cve_items  " \
+            "WHERE LOWER(vulnerable_software_list) LIKE '%zimbra%'  " \
+            "ORDER BY pdate"
+    connection = engine.connect()
+    connection.execute(query)
 
 
 # ======================================================================================================================
@@ -347,7 +676,7 @@ def main():
                                "Enter 3 to to run third step  --> "
                                "Extract CVE_Items[] from json files, perform feature extraction "
                                "(dimensionality reduction) & save them to sqlite...\n"
-                               "Enter 4 to run fourth step ---> ...\n"
+                               "Enter 4 to run fourth step ---> Execute forecasting algorithms...\n"
                                "Enter -1 to to stop program execution...\n"))
         except ValueError:
             print("You entered a wrong choice...\n\n")
@@ -422,8 +751,9 @@ def main():
                             # Fill data to NVD table
                             fill_data_to_main_tables(cve_items_dict)
                         elif _choice == 3:
-                            # Then fill data to the rest of the sub tables
-                            fill_data_to_sub_tables(cve_items_dict)
+                            # TODO: Add check so this routine is executed only if cve_items table has been
+                            #  created/loaded Then fill data to the rest of the sub tables
+                            fill_data_to_sub_tables()
                         elif _choice == -1:
                             print("Exiting current third step subroutine execution...\n\n")
                             break
