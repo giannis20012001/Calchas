@@ -1,0 +1,14 @@
+###### Requirements without Version Specifiers ######`
+os
+gzip
+json
+scipy
+numpy
+pandas
+shutil
+sklearn
+datetime
+requests
+sqlalchemy
+matplotlib
+statsmodels
