@@ -938,9 +938,10 @@ def main():
                 while True:
                     try:
                         _choice = int(input("Enter 1 to create tables...\n"
-                                            "Enter 2 to fill data to main tables...\n"
+                                            "Enter 2 to fill data to main tables, perform values reduction & create "
+                                            "final tables...\n"
                                             "Enter 3 to fill data to sub tables...\n"
-                                            "Enter 4 to perform values reduction & create final tables...\n"
+                                            "Enter 4 ...\n"
                                             "Enter 5...\n"
                                             "Enter -1 to exit third step subroutine execution...\n"))
                     except ValueError:
@@ -954,12 +955,13 @@ def main():
                         elif _choice == 2:
                             # Fill data to NVD table
                             fill_data_to_main_tables(cve_items_dict)
+                            create_final_tables()
                         elif _choice == 3:
                             # TODO: Add check so this routine is executed only if cve_items table has been
                             #  created/loaded Then fill data to the rest of the sub tables
                             fill_data_to_sub_tables()
                         elif _choice == 4:
-                            create_final_tables()
+                            print(_choice)
                         elif _choice == 5:
                             print(_choice)
                         elif _choice == -1:
