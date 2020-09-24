@@ -3,12 +3,18 @@ import os
 import gzip
 import json
 import shutil
+import sqlite3
 import requests
 import datetime
+import warnings
+import numpy as np
+import pandas as pd
 from glob import glob
 from os import listdir
 from db_models import *
+import matplotlib.pyplot as plt
 from os.path import isfile, join
+from pandas import DataFrame
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -108,6 +114,7 @@ def check_keys_exists(element, *keys):
     return True
 
 
+# noinspection PyUnresolvedReferences
 def create_tables():
     print("Creating basic & sub tables in sqlite...")
     engine, session = sqlalchemy_engine_start()
@@ -866,6 +873,122 @@ def create_final_tables():
     print("Value reduction & data entry to final tables has finished...\n\n")
 
 
+# noinspection DuplicatedCode
+def fft_plot(sig, dt=None, plot=True):
+    # here it's assumes analytic signal (real signal...) - so only half of the axis is required
+    if dt is None:
+        dt = 1
+        t = np.arange(0, sig.shape[-1])
+        x_label = 'samples'
+    else:
+        t = np.arange(0, sig.shape[-1]) * dt
+        x_label = 'freq [Hz]'
+
+    if sig.shape[0] % 2 != 0:
+        warnings.warn("signal preferred to be even in size, autoFixing it...")
+        t = t[0:-1]
+        sig = sig[0:-1]
+
+    sig_fft = np.fft.fft(sig) / t.shape[0]  # divided by size t for coherent magnitude
+
+    freq = np.fft.fftfreq(t.shape[0], d=dt)
+
+    first_ten = 0
+    for x in np.nditer(freq[:11]):
+        first_ten = first_ten + x
+
+    last_ten = 0
+    for x in np.nditer(freq[-10:]):
+        last_ten = last_ten + x
+
+    # plot analytic signal - right half of freq axis needed only...
+    first_neg_ind = np.argmax(freq < 0)
+    freq_axis_pos = freq[0:first_neg_ind]
+    sig_fft_pos = 2 * sig_fft[0:first_neg_ind]  # *2 because of magnitude of analytic signal
+
+    if plot:
+        plt.figure()
+        plt.plot(freq_axis_pos, np.abs(sig_fft_pos))
+        plt.xlabel(x_label)
+        plt.ylabel('mag')
+        plt.title('Analytic FFT plot')
+        plt.show()
+
+    return last_ten / first_ten
+
+
+# noinspection DuplicatedCode
+def create_input_dataset_for_forecast_methods(table_name):
+    print("Create input dataset for " + table_name + "...")
+
+    # Create a SQL connection to SQLite database that holds final tables
+    con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
+    # Read sqlite query results into a pandas DataFrame
+    query = "SELECT published_datetime, score from " + table_name
+    df = pd.read_sql_query(query, con)
+    # Close connection when done
+    con.close()
+
+    df.published_datetime = pd.to_datetime(df.published_datetime)
+    # Check if duplicate values exist in published_datetime column and keep the maximum value
+    if df.published_datetime.duplicated().any():
+        # Remove duplicate values for the same date
+        df = df.groupby('published_datetime').max()
+        df = df.reset_index()
+
+    # create series from dataframe
+    ts = pd.Series(df['score'].values, index=df['published_datetime'])
+    ts.index = pd.DatetimeIndex(ts.index)
+    # Create all missing date values
+    idx = pd.date_range(df['published_datetime'].min(), df['published_datetime'].max())
+    ts = ts.reindex(idx, fill_value=0)
+
+    # Verify that result of SQL query is stored in the dataframe
+    print()
+    print("===============================================")
+    print(ts.describe())
+    print("===============================================")
+    print()
+
+    # Start checks for missing values
+    # ===============================
+    years_list = ts.index.strftime("%Y").drop_duplicates().tolist()
+    missing_values = DataFrame(index=range(len(years_list)), columns=['System_Examined',
+                                                                      'Start_Year_Range',
+                                                                      'Stop_Year_Range',
+                                                                      'Total_num_of_Values',
+                                                                      'Non_Zero_values',
+                                                                      'Percentage_of_missing_values'])
+    missing_values['System_Examined'] = table_name
+    missing_values['Start_Year_Range'] = years_list
+    missing_values['Stop_Year_Range'] = years_list[-1]
+
+    missing_values['Total_num_of_Values'] = ts.size
+    missing_values['Non_Zero_values'] = ts.values.astype(bool).sum(axis=0)
+
+    print(missing_values)
+    print("===============================================")
+    print()
+
+    # First check for day
+    # ===============================
+    D = ts.size
+    time_interval = ts.index[-1] - ts.index[1]
+    # fs is sampling frequency
+    fs = float(D / time_interval.days)
+
+    result = np.abs(fft_plot(ts.values, dt=fs))
+    if 0.5 < result <= 1:
+        print("Do something")
+        # Second for week
+        # ===============================
+
+    # Third for month
+    # ===============================
+
+    print("Input dataset creation for " + table_name + " has finished...\n\n")
+
+
 # ======================================================================================================================
 # Main function
 # ======================================================================================================================
@@ -878,7 +1001,9 @@ def main():
                                "Extract data from downloaded NVD .gz files & create json files...\n"
                                "Enter 3 to to run third step  --> "
                                "Extract CVE_Items[] from json files, prepare dataset & save it to sqlite...\n"
-                               "Enter 4 to run fourth step ---> Execute forecasting algorithms...\n"
+                               "Enter 4 to run fourth step ---> "
+                               "Create the input datasets to use with the forecast methods...\n"
+                               "Enter 5 to run fifth step ---> Execute forecasting algorithms...\n"
                                "Enter -1 to to stop program execution...\n"))
         except ValueError:
             print("You entered a wrong choice...\n\n")
@@ -941,8 +1066,7 @@ def main():
                                             "Enter 2 to fill data to main tables, perform values reduction & create "
                                             "final tables...\n"
                                             "Enter 3 to fill data to sub tables...\n"
-                                            "Enter 4 ...\n"
-                                            "Enter 5...\n"
+                                            "Enter 4 To create dataset input for forecast methods...\n"
                                             "Enter -1 to exit third step subroutine execution...\n"))
                     except ValueError:
                         print("You entered a wrong choice...\n\n")
@@ -953,17 +1077,15 @@ def main():
                             # Create initial NVD table & the various sub tables
                             create_tables()
                         elif _choice == 2:
-                            # Fill data to NVD table
+                            # Fill data to main tables
                             fill_data_to_main_tables(cve_items_dict)
+                            # Fill data to final tables
                             create_final_tables()
                         elif _choice == 3:
-                            # TODO: Add check so this routine is executed only if cve_items table has been
+                            # TODO: Add check so that this routine is executed only if cve_items table has been
                             #  created/loaded Then fill data to the rest of the sub tables
+                            # Fill data to sub tables
                             fill_data_to_sub_tables()
-                        elif _choice == 4:
-                            print(_choice)
-                        elif _choice == 5:
-                            print(_choice)
                         elif _choice == -1:
                             print("Exiting current third step subroutine execution...\n\n")
                             break
@@ -972,8 +1094,56 @@ def main():
 
                 print("Third step has finished...\n\n")
             elif choice == 4:
-                print("Started fourth step! Execute forecasting algorithms...")
+                print("Started fourth step! Create the input datasets to use with the forecast methods...")
+                print("There is total of 8 systems to choose from...")
+                while True:
+                    try:
+                        choice = int(input("Enter 1 to create dataset for microsoft_application_server_final...\n"
+                                           "Enter 2 to create dataset for microsoft_database_server_final...\n"
+                                           "Enter 3 to create dataset for microsoft_mail_server_final...\n"
+                                           "Enter 4 to create dataset for openstack_compute_server_final...\n"
+                                           "Enter 5 to create dataset for openstack_controller_server_final...\n"
+                                           "Enter 6 to create dataset for ubuntu_application_server_final...\n"
+                                           "Enter 7 to create dataset for ubuntu_database_server_final...\n"
+                                           "Enter 8 to create dataset for ubuntu_mail_server_final...\n"
+                                           "Enter -1 to exit third step subroutine execution...\n"))
+                    except ValueError:
+                        print("You entered a wrong choice...\n\n")
+                    else:
+                        if choice == 1:
+                            # Create the input dataset for microsoft_application_server_final
+                            create_input_dataset_for_forecast_methods("microsoft_application_server_final")
+                        elif choice == 2:
+                            # Create the input dataset for microsoft_database_server_final
+                            create_input_dataset_for_forecast_methods("microsoft_database_server_final")
+                        elif choice == 3:
+                            # Create the input dataset for microsoft_mail_server_final
+                            create_input_dataset_for_forecast_methods("microsoft_mail_server_final")
+                        elif choice == 4:
+                            # Create the input dataset for openstack_compute_server_final
+                            create_input_dataset_for_forecast_methods("openstack_compute_server_final")
+                        elif choice == 5:
+                            # Create the input dataset for openstack_controller_server_final
+                            create_input_dataset_for_forecast_methods("openstack_controller_server_final")
+                        elif choice == 6:
+                            # Create the input dataset for ubuntu_application_server_final
+                            create_input_dataset_for_forecast_methods("ubuntu_application_server_final")
+                        elif choice == 7:
+                            # Create the input dataset for ubuntu_database_server_final
+                            create_input_dataset_for_forecast_methods("ubuntu_database_server_final")
+                        elif choice == 8:
+                            # Create the input dataset for ubuntu_mail_server_final
+                            create_input_dataset_for_forecast_methods("ubuntu_mail_server_final")
+                        elif choice == -1:
+                            print("Exiting current fourth step subroutine execution...\n\n")
+                            break
+                        else:
+                            print("You entered a wrong choice...\n\n")
+
                 print("Fourth step has finished...\n\n")
+            elif choice == 5:
+                print("Started fifth step! Execute forecasting algorithms...")
+                print("Fifth step has finished...\n\n")
             elif choice == -1:
                 print("Thank you for using Calchas! Now exiting program...\n\n")
                 break
