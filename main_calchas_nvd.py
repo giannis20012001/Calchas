@@ -9,10 +9,11 @@ import datetime
 import warnings
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from glob import glob
+from numpy import nan
 from os import listdir
 from db_models import *
-import matplotlib.pyplot as plt
 from os.path import isfile, join
 from pandas import DataFrame
 from sqlalchemy import create_engine
@@ -873,8 +874,59 @@ def create_final_tables():
     print("Value reduction & data entry to final tables has finished...\n\n")
 
 
+def calculate_missing_values_dataframe(ts_wmv, years_list, table_name, time_granularity_val):
+    missing_values_df = DataFrame(index=range(len(years_list)), columns=['System_Examined',
+                                                                         'Start_Year_Range',
+                                                                         'Stop_Year_Range',
+                                                                         'Total_num_of_Values',
+                                                                         'Non_Zero_values',
+                                                                         'Percentage_of_missing_values',
+                                                                         'time_granularity'])
+    missing_values_df['System_Examined'] = table_name
+    missing_values_df['Start_Year_Range'] = years_list
+    # missing_values_df['Start_Year_Range'] = pd.to_datetime(missing_values_df['Start_Year_Range'])
+    missing_values_df['Stop_Year_Range'] = years_list[-1]
+    # missing_values_df['Stop_Year_Range'] = pd.to_datetime(missing_values_df['Stop_Year_Range'])
+    missing_values_df['time_granularity'] = time_granularity_val
+
+    # Count total number of values (zeros included)
+    for i in range(len(years_list)):
+        count = 0
+        for index_val, series_val in ts_wmv.iteritems():
+            if int(missing_values_df['Start_Year_Range'][i]) <= index_val.year <= \
+                    int(missing_values_df['Stop_Year_Range'][i]):
+                count = count + 1
+        missing_values_df.iloc[i, missing_values_df.columns.get_loc('Total_num_of_Values')] = count
+
+    # Count total number of none zero values
+    for i in range(len(years_list)):
+        count = 0
+        for index_val, series_val in ts_wmv.iteritems():
+            if (int(missing_values_df['Start_Year_Range'][i]) <= index_val.year <=
+                int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
+                count = count + 1
+        missing_values_df.iloc[i, missing_values_df.columns.get_loc('Non_Zero_values')] = count
+
+    # Calculate the data missing values percentage
+    for i in range(len(years_list)):
+        missing_values_df.iloc[i, missing_values_df.columns.get_loc('Percentage_of_missing_values')] = \
+            ((missing_values_df['Total_num_of_Values'][i] - missing_values_df['Non_Zero_values'][i]) /
+             missing_values_df['Total_num_of_Values'][i]) * 100
+
+    # Display full dataframe
+    print("missing_values dataframe presentation: ")
+    print()
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', None,
+                           'display.max_colwidth', -1):
+        print(missing_values_df)
+    print("===============================================")
+    print()
+
+    return missing_values_df
+
+
 # noinspection DuplicatedCode
-def fft_plot(sig, dt=None, plot=True):
+def calculate_fft(sig, dt=None, plot=True):
     # here it's assumes analytic signal (real signal...) - so only half of the axis is required
     if dt is None:
         dt = 1
@@ -902,91 +954,189 @@ def fft_plot(sig, dt=None, plot=True):
         last_ten = last_ten + x
 
     # plot analytic signal - right half of freq axis needed only...
-    first_neg_ind = np.argmax(freq < 0)
-    freq_axis_pos = freq[0:first_neg_ind]
-    sig_fft_pos = 2 * sig_fft[0:first_neg_ind]  # *2 because of magnitude of analytic signal
-
-    if plot:
-        plt.figure()
-        plt.plot(freq_axis_pos, np.abs(sig_fft_pos))
-        plt.xlabel(x_label)
-        plt.ylabel('mag')
-        plt.title('Analytic FFT plot')
-        plt.show()
+    # first_neg_ind = np.argmax(freq < 0)
+    # freq_axis_pos = freq[0:first_neg_ind]
+    # sig_fft_pos = 2 * sig_fft[0:first_neg_ind]  # *2 because of magnitude of analytic signal
+    #
+    # if plot:
+    #     plt.figure()
+    #     plt.plot(freq_axis_pos, np.abs(sig_fft_pos))
+    #     plt.xlabel(x_label)
+    #     plt.ylabel('mag')
+    #     plt.title('Analytic FFT plot')
+    #     plt.show()
 
     return last_ten / first_ten
 
 
+def get_fft_ratio(ts):
+    # Check for fft ratio
+    D = ts.size
+    time_interval = ts.index[-1] - ts.index[1]
+    # fs is sampling frequency
+    fs = float(D / time_interval.days)
+    result = np.abs(calculate_fft(ts.values, dt=fs))
+
+    return result
+
+
+def check_missing_value_percentage(ts, missing_values):
+    result = get_fft_ratio(ts)
+    missing_values_percentage_threshold = 0
+    if result < 0.5:
+        missing_values_percentage_threshold = 20
+    elif 0.5 < result <= 1:
+        missing_values_percentage_threshold = 10
+
+    mv_flag = False
+    start_year = 0
+    end_year = 0
+    for index_val, series_val in missing_values['Percentage_of_missing_values'].iteritems():
+        if series_val <= missing_values_percentage_threshold:
+            mv_flag = True
+            start_year = missing_values['Start_Year_Range'][index_val]
+            end_year = missing_values['Stop_Year_Range'][index_val]
+            break
+
+    return mv_flag, start_year, end_year
+
+
 # noinspection DuplicatedCode
 def create_input_dataset_for_forecast_methods(table_name):
+    print()
     print("Create input dataset for " + table_name + "...")
+
+    # Allocate initial values in flags
+    eligible_range_for_week = False
+    eligible_range_for_month = False
 
     # Create a SQL connection to SQLite database that holds final tables
     con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
     # Read sqlite query results into a pandas DataFrame
     query = "SELECT published_datetime, score from " + table_name
-    df = pd.read_sql_query(query, con)
+    initial_df = pd.read_sql_query(query, con)
     # Close connection when done
     con.close()
 
-    df.published_datetime = pd.to_datetime(df.published_datetime)
+    initial_df.published_datetime = pd.to_datetime(initial_df.published_datetime)
     # Check if duplicate values exist in published_datetime column and keep the maximum value
-    if df.published_datetime.duplicated().any():
+    if initial_df.published_datetime.duplicated().any():
         # Remove duplicate values for the same date
-        df = df.groupby('published_datetime').max()
-        df = df.reset_index()
+        initial_df = initial_df.groupby('published_datetime').max()
+        initial_df = initial_df.reset_index()
 
+    # ==================================================================================================================
+    # First check for day
+    # ==================================================================================================================
     # create series from dataframe
-    ts = pd.Series(df['score'].values, index=df['published_datetime'])
+    ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
     ts.index = pd.DatetimeIndex(ts.index)
-    # Create all missing date values
-    idx = pd.date_range(df['published_datetime'].min(), df['published_datetime'].max())
-    ts = ts.reindex(idx, fill_value=0)
+    # Create time series with all missing date values and fill them with zeros
+    idx = pd.date_range(initial_df['published_datetime'].min(), initial_df['published_datetime'].max())
+    # Create day time interval
+    ts_wmv_day = ts.reindex(idx, fill_value=0)
 
     # Verify that result of SQL query is stored in the dataframe
-    print()
     print("===============================================")
-    print(ts.describe())
-    print("===============================================")
-    print()
-
-    # Start checks for missing values
-    # ===============================
-    years_list = ts.index.strftime("%Y").drop_duplicates().tolist()
-    missing_values = DataFrame(index=range(len(years_list)), columns=['System_Examined',
-                                                                      'Start_Year_Range',
-                                                                      'Stop_Year_Range',
-                                                                      'Total_num_of_Values',
-                                                                      'Non_Zero_values',
-                                                                      'Percentage_of_missing_values'])
-    missing_values['System_Examined'] = table_name
-    missing_values['Start_Year_Range'] = years_list
-    missing_values['Stop_Year_Range'] = years_list[-1]
-
-    missing_values['Total_num_of_Values'] = ts.size
-    missing_values['Non_Zero_values'] = ts.values.astype(bool).sum(axis=0)
-
-    print(missing_values)
+    print("ts day dataframe description: ")
+    print(ts_wmv_day.describe())
     print("===============================================")
     print()
 
-    # First check for day
-    # ===============================
-    D = ts.size
-    time_interval = ts.index[-1] - ts.index[1]
-    # fs is sampling frequency
-    fs = float(D / time_interval.days)
+    # Create missing values dataframe
+    years_list = ts_wmv_day.index.strftime("%Y").drop_duplicates().tolist()
+    missing_values = calculate_missing_values_dataframe(ts_wmv_day, years_list, table_name, "day")
+    # Check for full time range
+    eligible_range_for_day, start_year, end_year = check_missing_value_percentage(ts, missing_values)
+    # Check for reducing (rolling window) year ranges
+    i = 0
+    while not eligible_range_for_day and i < (len(years_list) - 1):
+        ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
+        eligible_range_for_day, start_year, end_year = check_missing_value_percentage(ts, missing_values)
+        if eligible_range_for_day:
+            break
+        i += 1
 
-    result = np.abs(fft_plot(ts.values, dt=fs))
-    if 0.5 < result <= 1:
-        print("Do something")
-        # Second for week
-        # ===============================
+    if eligible_range_for_day:
+        # TODO: Implement part to impute missing values & save to csv method
+        print("Day time_granularity was found eligible...")
+        print("Creating time series with imputed missing values...")
+        # Add code here ...............................................
+        print("Saving series to csv to be used by forecast methods...")
+        print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
 
-    # Third for month
-    # ===============================
+        return True
 
-    print("Input dataset creation for " + table_name + " has finished...\n\n")
+    # ==================================================================================================================
+    # Second check for week
+    # ==================================================================================================================
+    if not eligible_range_for_day:
+        print("Day time_granularity was not eligible. Switching to week...")
+        # create series from dataframe
+        ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
+        ts.index = pd.DatetimeIndex(ts.index)
+        # Create all missing date values and fill them with zero
+        idx = pd.date_range(initial_df['published_datetime'].min(), initial_df['published_datetime'].max())
+        ts_wmv_week = ts.reindex(idx, fill_value=0)
+        # Create week time interval
+        ts_wmv_week = ts_wmv_week.resample('W-MON', label='left', closed='left').max()
+
+        # Verify that result of SQL query is stored in the dataframe
+        print("===============================================")
+        print("ts week dataframe description: ")
+        print(ts_wmv_week.describe())
+        print("===============================================")
+        print()
+
+        # Create missing values dataframe
+        years_list = ts_wmv_week.index.strftime("%Y").drop_duplicates().tolist()
+        missing_values = calculate_missing_values_dataframe(ts_wmv_week, years_list, table_name, "week")
+        # Check for full time range
+        eligible_range_for_week, start_year, end_year = check_missing_value_percentage(ts, missing_values)
+        # Check for reducing (rolling window) year ranges
+        i = 0
+        while not eligible_range_for_week and i < (len(years_list) - 1):
+            ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
+            eligible_range_for_week, start_year, end_year = check_missing_value_percentage(ts, missing_values)
+            if eligible_range_for_week:
+                break
+            i += 1
+
+        if eligible_range_for_week:
+            print("Week time_granularity was found eligible...")
+            print("Creating time series with imputed missing values...")
+            for year in years_list:
+                if year < start_year:
+                    ts_wmv_week = ts_wmv_week.drop(ts_wmv_week.index[ts_wmv_week.index.year.isin([int(year)])])
+                elif year >= start_year:
+                    break
+
+            ts_wmv_week = ts_wmv_week.replace({0: np.nan})
+
+            print("Saving series to csv to be used by forecast methods...")
+            print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
+
+            return True
+
+    # ==================================================================================================================
+    # Third check for month
+    # ==================================================================================================================
+    if eligible_range_for_week:
+        print("Week time_granularity was not eligible. Switching to month...")
+
+        if eligible_range_for_month:
+            # TODO: Implement part to impute missing values & save to csv method
+            print("Month time_granularity was found eligible...")
+            print("Saving series to csv to be used by forecast methods...")
+            print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
+
+            return True
+
+    # ==================================================================================================================
+
+    print("Input dataset creation for " + table_name + " could not produce/find any suitable dataset...\n\n")
+
+    return False
 
 
 # ======================================================================================================================
@@ -1002,7 +1152,7 @@ def main():
                                "Enter 3 to to run third step  --> "
                                "Extract CVE_Items[] from json files, prepare dataset & save it to sqlite...\n"
                                "Enter 4 to run fourth step ---> "
-                               "Create the input datasets to use with the forecast methods...\n"
+                               "Create the input datasets to use with the forecast methods and save them as csv...\n"
                                "Enter 5 to run fifth step ---> Execute forecasting algorithms...\n"
                                "Enter -1 to to stop program execution...\n"))
         except ValueError:
@@ -1098,48 +1248,49 @@ def main():
                 print("There is total of 8 systems to choose from...")
                 while True:
                     try:
-                        choice = int(input("Enter 1 to create dataset for microsoft_application_server_final...\n"
-                                           "Enter 2 to create dataset for microsoft_database_server_final...\n"
-                                           "Enter 3 to create dataset for microsoft_mail_server_final...\n"
-                                           "Enter 4 to create dataset for openstack_compute_server_final...\n"
-                                           "Enter 5 to create dataset for openstack_controller_server_final...\n"
-                                           "Enter 6 to create dataset for ubuntu_application_server_final...\n"
-                                           "Enter 7 to create dataset for ubuntu_database_server_final...\n"
-                                           "Enter 8 to create dataset for ubuntu_mail_server_final...\n"
-                                           "Enter -1 to exit third step subroutine execution...\n"))
+                        _choice = int(input("Enter 1 to create dataset for microsoft_application_server_final...\n"
+                                            "Enter 2 to create dataset for microsoft_database_server_final...\n"
+                                            "Enter 3 to create dataset for microsoft_mail_server_final...\n"
+                                            "Enter 4 to create dataset for openstack_compute_server_final...\n"
+                                            "Enter 5 to create dataset for openstack_controller_server_final...\n"
+                                            "Enter 6 to create dataset for ubuntu_application_server_final...\n"
+                                            "Enter 7 to create dataset for ubuntu_database_server_final...\n"
+                                            "Enter 8 to create dataset for ubuntu_mail_server_final...\n"
+                                            "Enter -1 to exit third step subroutine execution...\n"))
                     except ValueError:
                         print("You entered a wrong choice...\n\n")
                     else:
-                        if choice == 1:
+                        if _choice == 1:
                             # Create the input dataset for microsoft_application_server_final
                             create_input_dataset_for_forecast_methods("microsoft_application_server_final")
-                        elif choice == 2:
+                        elif _choice == 2:
                             # Create the input dataset for microsoft_database_server_final
                             create_input_dataset_for_forecast_methods("microsoft_database_server_final")
-                        elif choice == 3:
+                        elif _choice == 3:
                             # Create the input dataset for microsoft_mail_server_final
                             create_input_dataset_for_forecast_methods("microsoft_mail_server_final")
-                        elif choice == 4:
+                        elif _choice == 4:
                             # Create the input dataset for openstack_compute_server_final
                             create_input_dataset_for_forecast_methods("openstack_compute_server_final")
-                        elif choice == 5:
+                        elif _choice == 5:
                             # Create the input dataset for openstack_controller_server_final
                             create_input_dataset_for_forecast_methods("openstack_controller_server_final")
-                        elif choice == 6:
+                        elif _choice == 6:
                             # Create the input dataset for ubuntu_application_server_final
                             create_input_dataset_for_forecast_methods("ubuntu_application_server_final")
-                        elif choice == 7:
+                        elif _choice == 7:
                             # Create the input dataset for ubuntu_database_server_final
                             create_input_dataset_for_forecast_methods("ubuntu_database_server_final")
-                        elif choice == 8:
+                        elif _choice == 8:
                             # Create the input dataset for ubuntu_mail_server_final
                             create_input_dataset_for_forecast_methods("ubuntu_mail_server_final")
-                        elif choice == -1:
+                        elif _choice == -1:
                             print("Exiting current fourth step subroutine execution...\n\n")
                             break
                         else:
                             print("You entered a wrong choice...\n\n")
 
+                # TODO: Show successful and not successful datasets
                 print("Fourth step has finished...\n\n")
             elif choice == 5:
                 print("Started fifth step! Execute forecasting algorithms...")
