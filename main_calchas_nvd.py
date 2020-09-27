@@ -1111,7 +1111,7 @@ def create_input_dataset_for_forecast_methods(table_name):
                 elif year >= start_year:
                     break
 
-            ts_wmv_week = ts_wmv_week.replace({0: np.nan})
+            ts_wmv_week = ts_wmv_week.replace({0: nan})
 
             print("Saving series to csv to be used by forecast methods...")
             print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
