@@ -11,13 +11,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from glob import glob
-from numpy import nan
+from numpy import nan, isnan
 from os import listdir
 from db_models import *
 from os.path import isfile, join
 from pandas import DataFrame
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sklearn.impute import KNNImputer
 
 
 # ======================================================================================================================
@@ -903,7 +904,7 @@ def calculate_missing_values_dataframe(ts_wmv, years_list, table_name, time_gran
         count = 0
         for index_val, series_val in ts_wmv.iteritems():
             if (int(missing_values_df['Start_Year_Range'][i]) <= index_val.year <=
-                int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
+                    int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
                 count = count + 1
         missing_values_df.iloc[i, missing_values_df.columns.get_loc('Non_Zero_values')] = count
 
@@ -942,22 +943,34 @@ def calculate_fft(sig, dt=None, plot=True):
         sig = sig[0:-1]
 
     sig_fft = np.fft.fft(sig) / t.shape[0]  # divided by size t for coherent magnitude
-
     freq = np.fft.fftfreq(t.shape[0], d=dt)
 
+    np_fft = np.fft.fft(sig)
+    n_samples = sig.size
+    amplitudes = 2 / n_samples * np.abs(np_fft)
+    amplitudes = np.abs(amplitudes)
+
+    # plot analytic signal - right half of freq axis needed only...
+    first_neg_ind = np.argmax(freq < 0)
+    freq_axis_pos = freq[0:first_neg_ind]
+    sig_fft_pos = 2 * sig_fft[0:first_neg_ind]  # *2 because of magnitude of analytic signal
+
     first_ten = 0
-    for x in np.nditer(freq[:11]):
+    for x in np.nditer(np.abs(sig_fft_pos[1:11])):
         first_ten = first_ten + x
 
     last_ten = 0
-    for x in np.nditer(freq[-10:]):
+    for x in np.nditer(np.abs(sig_fft_pos[-10:])):
         last_ten = last_ten + x
 
-    # plot analytic signal - right half of freq axis needed only...
-    # first_neg_ind = np.argmax(freq < 0)
-    # freq_axis_pos = freq[0:first_neg_ind]
-    # sig_fft_pos = 2 * sig_fft[0:first_neg_ind]  # *2 because of magnitude of analytic signal
+    # first_ten = 0
+    # for x in np.nditer(amplitudes[1:11]):
+    #     first_ten = first_ten + x
     #
+    # last_ten = 0
+    # for x in np.nditer(amplitudes[-10:]):
+    #     last_ten = last_ten + x
+
     # if plot:
     #     plt.figure()
     #     plt.plot(freq_axis_pos, np.abs(sig_fft_pos))
@@ -985,7 +998,7 @@ def check_missing_value_percentage(ts, missing_values):
     missing_values_percentage_threshold = 0
     if result < 0.5:
         missing_values_percentage_threshold = 20
-    elif 0.5 < result <= 1:
+    elif result >= 0.5:
         missing_values_percentage_threshold = 10
 
     mv_flag = False
@@ -998,7 +1011,23 @@ def check_missing_value_percentage(ts, missing_values):
             end_year = missing_values['Stop_Year_Range'][index_val]
             break
 
-    return mv_flag, start_year, end_year
+    return mv_flag, missing_values_percentage_threshold, start_year, end_year
+
+
+def fill_missing_values(ts):
+    print('Missing: %d' % sum(isnan(ts.values).flatten()))
+    # define imputer
+    imputer = KNNImputer()
+    temp = ts.values.reshape(-1, 1)
+    # fit on the dataset
+    imputer.fit(temp)
+    # transform the dataset and cast table from 2D to 1D
+    Xtrans = imputer.transform(temp).flatten()
+    ts.iloc[:] = Xtrans
+    # summarize total missing
+    print('Missing: %d' % sum(isnan(ts.values).flatten()))
+
+    return ts
 
 
 # noinspection DuplicatedCode
@@ -1008,7 +1037,6 @@ def create_input_dataset_for_forecast_methods(table_name):
 
     # Allocate initial values in flags
     eligible_range_for_week = False
-    eligible_range_for_month = False
 
     # Create a SQL connection to SQLite database that holds final tables
     con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
@@ -1047,22 +1075,40 @@ def create_input_dataset_for_forecast_methods(table_name):
     years_list = ts_wmv_day.index.strftime("%Y").drop_duplicates().tolist()
     missing_values = calculate_missing_values_dataframe(ts_wmv_day, years_list, table_name, "day")
     # Check for full time range
-    eligible_range_for_day, start_year, end_year = check_missing_value_percentage(ts, missing_values)
+    eligible_range_for_day, missing_values_percentage_threshold, start_year, end_year = \
+        check_missing_value_percentage(ts, missing_values)
+    if eligible_range_for_day:
+        if missing_values_percentage_threshold == 20:
+            print("Missing values percentage threshold used is 20%...")
+        elif missing_values_percentage_threshold == 10:
+            print("Missing values percentage threshold used is 10%...")
     # Check for reducing (rolling window) year ranges
-    i = 0
-    while not eligible_range_for_day and i < (len(years_list) - 1):
-        ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
-        eligible_range_for_day, start_year, end_year = check_missing_value_percentage(ts, missing_values)
-        if eligible_range_for_day:
-            break
-        i += 1
+    # i = 0
+    # while not eligible_range_for_day and i < (len(years_list) - 1):
+    #     ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
+    #     eligible_range_for_day, missing_values_percentage_threshold, start_year, end_year = \
+    #         check_missing_value_percentage(ts, missing_values)
+    #     if eligible_range_for_day:
+    #         if missing_values_percentage_threshold == 20:
+    #             print("Missing values percentage threshold used is 20%...")
+    #         elif missing_values_percentage_threshold == 10:
+    #             print("Missing values percentage threshold used is 10%...")
+    #         break
+    #     i += 1
 
     if eligible_range_for_day:
         # TODO: Implement part to impute missing values & save to csv method
         print("Day time_granularity was found eligible...")
-        print("Creating time series with imputed missing values...")
-        # Add code here ...............................................
+        for year in years_list:
+            if year < start_year:
+                ts_wmv_day = ts_wmv_day.drop(ts_wmv_day.index[ts_wmv_day.index.year.isin([int(year)])])
+            elif year >= start_year:
+                break
+        # Series within the selected time range, with 0 replaced by NaN
+        ts_wmv_day = ts_wmv_day.replace({0: nan})
+        ts_wmv_day = fill_missing_values(ts_wmv_day)
         print("Saving series to csv to be used by forecast methods...")
+        ts_wmv_day.to_csv(r'data/datasets/' + table_name + '_day.csv', header=None)
         print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
 
         return True
@@ -1092,15 +1138,26 @@ def create_input_dataset_for_forecast_methods(table_name):
         years_list = ts_wmv_week.index.strftime("%Y").drop_duplicates().tolist()
         missing_values = calculate_missing_values_dataframe(ts_wmv_week, years_list, table_name, "week")
         # Check for full time range
-        eligible_range_for_week, start_year, end_year = check_missing_value_percentage(ts, missing_values)
+        eligible_range_for_week, missing_values_percentage_threshold, start_year, end_year = \
+            check_missing_value_percentage(ts, missing_values)
+        if eligible_range_for_week:
+            if missing_values_percentage_threshold == 20:
+                print("Missing values percentage threshold used is 20%...")
+            elif missing_values_percentage_threshold == 10:
+                print("Missing values percentage threshold used is 10%...")
         # Check for reducing (rolling window) year ranges
-        i = 0
-        while not eligible_range_for_week and i < (len(years_list) - 1):
-            ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
-            eligible_range_for_week, start_year, end_year = check_missing_value_percentage(ts, missing_values)
-            if eligible_range_for_week:
-                break
-            i += 1
+        # i = 0
+        # while not eligible_range_for_week and i < (len(years_list) - 1):
+        #     ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
+        #     eligible_range_for_week, missing_values_percentage_threshold, start_year, end_year = \
+        #         check_missing_value_percentage(ts, missing_values)
+        #     if eligible_range_for_week:
+        #         if missing_values_percentage_threshold == 20:
+        #             print("Missing values percentage threshold used is 20%...")
+        #         elif missing_values_percentage_threshold == 10:
+        #             print("Missing values percentage threshold used is 10%...")
+        #         break
+        #     i += 1
 
         if eligible_range_for_week:
             print("Week time_granularity was found eligible...")
@@ -1110,10 +1167,11 @@ def create_input_dataset_for_forecast_methods(table_name):
                     ts_wmv_week = ts_wmv_week.drop(ts_wmv_week.index[ts_wmv_week.index.year.isin([int(year)])])
                 elif year >= start_year:
                     break
-
+            # Series within the selected time range, with 0 replaced by NaN
             ts_wmv_week = ts_wmv_week.replace({0: nan})
-
+            ts_wmv_week = fill_missing_values(ts_wmv_week)
             print("Saving series to csv to be used by forecast methods...")
+            ts_wmv_week.to_csv(r'data/datasets/' + table_name + '_week.csv', header=None)
             print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
 
             return True
@@ -1123,11 +1181,47 @@ def create_input_dataset_for_forecast_methods(table_name):
     # ==================================================================================================================
     if eligible_range_for_week:
         print("Week time_granularity was not eligible. Switching to month...")
+        # create series from dataframe
+        ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
+        ts.index = pd.DatetimeIndex(ts.index)
+        # Create all missing date values and fill them with zero
+        idx = pd.date_range(initial_df['published_datetime'].min(), initial_df['published_datetime'].max())
+        ts_wmv_month = ts.reindex(idx, fill_value=0)
+        # Create week time interval
+        ts_wmv_month = ts_wmv_month.resample('M-MON', label='left', closed='left').max()
+
+        # Verify that result of SQL query is stored in the dataframe
+        print("===============================================")
+        print("ts month dataframe description: ")
+        print(ts_wmv_month.describe())
+        print("===============================================")
+        print()
+
+        # Create missing values dataframe
+        years_list = ts_wmv_month.index.strftime("%Y").drop_duplicates().tolist()
+        missing_values = calculate_missing_values_dataframe(ts_wmv_month, years_list, table_name, "month")
+        # Check for full time range
+        eligible_range_for_month, missing_values_percentage_threshold, start_year, end_year = \
+            check_missing_value_percentage(ts, missing_values)
+        if eligible_range_for_month:
+            if missing_values_percentage_threshold == 20:
+                print("Missing values percentage threshold used is 20%...")
+            elif missing_values_percentage_threshold == 10:
+                print("Missing values percentage threshold used is 10%...")
 
         if eligible_range_for_month:
-            # TODO: Implement part to impute missing values & save to csv method
             print("Month time_granularity was found eligible...")
+            print("Creating time series with imputed missing values...")
+            for year in years_list:
+                if year < start_year:
+                    ts_wmv_month = ts_wmv_month.drop(ts_wmv_month.index[ts_wmv_month.index.year.isin([int(year)])])
+                elif year >= start_year:
+                    break
+            # Series within the selected time range, with 0 replaced by NaN
+            ts_wmv_month = ts_wmv_month.replace({0: nan})
+            ts_wmv_month = fill_missing_values(ts_wmv_month)
             print("Saving series to csv to be used by forecast methods...")
+            ts_wmv_month.to_csv(r'data/datasets/' + table_name + '_month.csv', header=None)
             print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
 
             return True
