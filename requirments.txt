@@ -6,6 +6,7 @@ scipy
 numpy
 pandas
 shutil
+pynput
 sklearn
 datetime
 requests

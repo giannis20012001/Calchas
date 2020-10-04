@@ -11,14 +11,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from glob import glob
-from numpy import nan, isnan
 from os import listdir
 from db_models import *
-from os.path import isfile, join
+from numpy import nan, isnan
 from pandas import DataFrame
+from os.path import isfile, join
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sklearn.impute import KNNImputer
+from sqlalchemy.orm import sessionmaker
+from forecast_models.arima import initial_steps, modeling_steps, validation_steps
 
 
 # ======================================================================================================================
@@ -1233,6 +1234,96 @@ def create_input_dataset_for_forecast_methods(table_name):
     return False
 
 
+def choose_forecast_method(csv_file_name):
+    print("Choose forecast method...")
+
+    while True:
+        try:
+            choice = int(input("Enter 1 for autoregression model...\n"
+                               "Enter 2 for moving average model...\n"
+                               "Enter 3 for ARMA model...\n"
+                               "Enter 4 for ARIMA model...\n"
+                               "Enter 5 for polynomial regression model...\n"
+                               "Enter -1 to exit third step subroutine execution...\n"))
+        except ValueError:
+            print("You entered a wrong choice...\n\n")
+        else:
+            if choice == 1:
+                # Choose autoregression model
+                print("Autoregression model steps...")
+                print("First split initial dataset to training & validation ones...")
+                # initial_steps.split_dataset(csv_file_name)
+            elif choice == 2:
+                # Choose Moving average model
+                print("Moving average model steps...")
+                print("First split initial dataset to training & validation ones...")
+                # initial_steps.split_dataset(csv_file_name)
+            elif choice == 3:
+                # Choose ARMA model
+                print("ARMA model steps...")
+                print("First split initial dataset to training & validation ones...")
+                # initial_steps.split_dataset(csv_file_name)
+            elif choice == 4:
+                # Choose ARIMA model
+                print("ARIMA model steps...")
+                print("First step split initial dataset to training & validation ones...")
+                initial_steps.split_dataset(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Second step create persistence model to establish a baseline of performance...")
+                initial_steps.create_persistence_model_from_dataset(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Third step data analysis through summary statistics and plots...")
+                initial_steps.summary_statistics(csv_file_name)
+                input("Press Enter to continue...")
+                initial_steps.create_line_plots(csv_file_name)
+                input("Press Enter to continue...")
+                initial_steps.create_density_plots(csv_file_name)
+                input("Press Enter to continue...")
+                # initial_steps.create_boxplots_plots(csv_file_name)
+                # input("Press Enter to continue...")
+
+                print("Fourth step statistical test for the stationarity of the time series...")
+                modeling_steps.check_stationarity(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Fifth step ACF/PACF plots to determine ARIMA's (p, q)...")
+                modeling_steps.acf_pacf_plots(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Sixth step run manual ARIMA for specific (p, q, d) values...")
+                modeling_steps.manual_arima(csv_file_name)
+                input("Press Enter to continue...")
+
+                # print("Seventh step run grid search ARIMA to determine best (p, q, d) among an array of values...")
+                # modeling_steps.grid_search_arima(csv_file_name)
+                # input("Press Enter to continue...")
+
+                print("Eighth step plot residual errors plots...")
+                modeling_steps.residual_errors_plot(csv_file_name)
+                modeling_steps.residual_acf_errors_plot(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Ninth step save fitted model...")
+                validation_steps.save_fitted_model(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Tenth step validate fitted model...")
+                validation_steps.validate_arima_model(csv_file_name)
+                input("Press Enter to continue...")
+            elif choice == 5:
+                # Choose polynomial regression model
+                print("Polynomial regression steps...")
+                print("First split initial dataset to training & validation ones...")
+                # initial_steps.split_dataset(csv_file_name)
+            elif choice == -1:
+                print("Exiting current fifth step subroutine execution...\n\n")
+                break
+            else:
+                print("You entered a wrong choice...\n\n")
+
+
 # ======================================================================================================================
 # Main function
 # ======================================================================================================================
@@ -1388,6 +1479,52 @@ def main():
                 print("Fourth step has finished...\n\n")
             elif choice == 5:
                 print("Started fifth step! Execute forecasting algorithms...")
+                print("There is total of 8 systems to choose from...")
+                while True:
+                    try:
+                        _choice = int(input("Enter 1 to use microsoft_application_server_final dataset...\n"
+                                            "Enter 2 to use microsoft_database_server_final dataset...\n"
+                                            "Enter 3 to use microsoft_mail_server_final dataset...\n"
+                                            "Enter 4 to use openstack_compute_server_final dataset...\n"
+                                            "Enter 5 to use openstack_controller_server_final dataset...\n"
+                                            "Enter 6 to use ubuntu_application_server_final dataset...\n"
+                                            "Enter 7 to use ubuntu_database_server_final dataset...\n"
+                                            "Enter 8 to use ubuntu_mail_server_final dataset...\n"
+                                            "Enter -1 to exit third step subroutine execution...\n"))
+                    except ValueError:
+                        print("You entered a wrong choice...\n\n")
+                    # TODO: Add check to differentiate for day, week & month
+                    else:
+                        if _choice == 1:
+                            # Use microsoft_application_server_final dataset
+                            choose_forecast_method("microsoft_application_server_final_week.csv")
+                        elif _choice == 2:
+                            # Use microsoft_database_server_final dataset
+                            choose_forecast_method("microsoft_database_server_final_week.csv")
+                        elif _choice == 3:
+                            # Use microsoft_mail_server_final dataset
+                            choose_forecast_method("microsoft_mail_server_final_week.csv")
+                        elif _choice == 4:
+                            # Use openstack_compute_server_final dataset
+                            choose_forecast_method("openstack_compute_server_final_week.csv")
+                        elif _choice == 5:
+                            # Use openstack_controller_server_final dataset
+                            choose_forecast_method("openstack_controller_server_final_week.csv")
+                        elif _choice == 6:
+                            # Use ubuntu_application_server_final dataset
+                            choose_forecast_method("ubuntu_application_server_final_week.csv")
+                        elif _choice == 7:
+                            # Use ubuntu_database_server_final dataset
+                            choose_forecast_method("ubuntu_database_server_final_week.csv")
+                        elif _choice == 8:
+                            # Use ubuntu_mail_server_final dataset
+                            choose_forecast_method("ubuntu_mail_server_final_week.csv")
+                        elif _choice == -1:
+                            print("Exiting current fourth step subroutine execution...\n\n")
+                            break
+                        else:
+                            print("You entered a wrong choice...\n\n")
+
                 print("Fifth step has finished...\n\n")
             elif choice == -1:
                 print("Thank you for using Calchas! Now exiting program...\n\n")

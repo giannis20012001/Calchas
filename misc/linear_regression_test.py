@@ -6,7 +6,7 @@ import pandas as pd
 
 # Importing the datasets
 
-datasets = pd.read_csv('../../data/datasets/Salary_Data.csv') # Enter CSV
+datasets = pd.read_csv('../data/datasets/test_datasets/Salary_Data.csv') # Enter CSV
 
 X = datasets.iloc[:, :-1].values
 Y = datasets.iloc[:, 1].values
