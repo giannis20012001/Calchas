@@ -6,7 +6,6 @@ from pandas import DataFrame, concat
 from sklearn.metrics import mean_squared_error
 
 
-# TODO: Add check to differentiate for day, week & month
 # split into a training and validation dataset
 def split_dataset(csv_file_name):
     series = read_csv('data/datasets/' + csv_file_name, header=0, index_col=0, parse_dates=True, squeeze=True)
@@ -56,7 +55,6 @@ def split_dataset(csv_file_name):
     validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=False)
 
 
-# TODO: Add check to differentiate for day, week & month
 # evaluate a persistence model
 def create_persistence_model_from_dataset(csv_file_name):
     # load data for 70% - 30%

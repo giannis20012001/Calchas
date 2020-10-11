@@ -3,7 +3,8 @@ from math import sqrt
 from pandas import read_csv
 from pandas import DataFrame
 from matplotlib import pyplot
-from statsmodels.tsa.arima_model import ARIMA
+# Deprecated import: from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf
@@ -122,7 +123,7 @@ def manual_arima(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -157,7 +158,7 @@ def manual_arima(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -192,7 +193,7 @@ def manual_arima(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -217,7 +218,7 @@ def evaluate_arima_model(X, arima_order):
     predictions = list()
     for t in range(len(test)):
         model = ARIMA(history, order=arima_order)
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         history.append(test[t])
@@ -317,7 +318,7 @@ def residual_errors_plot(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -358,7 +359,7 @@ def residual_errors_plot(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -399,7 +400,7 @@ def residual_errors_plot(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -426,8 +427,8 @@ def residual_acf_errors_plot(csv_file_name):
     print("For 70% - 30% we have...")
     print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    q = input("Enter q value (Moving Average (MA) --> q): ")
     d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
     print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
     print("==========================================================")
     print()
@@ -442,7 +443,7 @@ def residual_acf_errors_plot(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -466,8 +467,8 @@ def residual_acf_errors_plot(csv_file_name):
     print("For 80% - 20% we have...")
     print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    q = input("Enter q value (Moving Average (MA) --> q): ")
     d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
     print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
     print("==========================================================")
     print()
@@ -482,7 +483,7 @@ def residual_acf_errors_plot(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
@@ -506,8 +507,8 @@ def residual_acf_errors_plot(csv_file_name):
     print("For 90% - 10% we have...")
     print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    q = input("Enter q value (Moving Average (MA) --> q): ")
     d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
     print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
     print("==========================================================")
     print()
@@ -522,7 +523,7 @@ def residual_acf_errors_plot(csv_file_name):
     for i in range(len(test)):
         # predict
         model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit(disp=0)
+        model_fit = model.fit()
         yhat = model_fit.forecast()[0]
         predictions.append(yhat)
         # observation
