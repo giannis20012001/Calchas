@@ -14,6 +14,7 @@ dataset_train = sm.datasets.sunspots.load_pandas().data
 # setting up the series and date as index
 training_set = dataset_train.iloc[:, 1:2]
 training_set.index = pd.DatetimeIndex(start='1700', end='2009', freq='A')
+# training_set.index = pd.DatetimeIndex('1700', '2009').asfreq('A')
 # visualising the plot
 training_set.plot()
 

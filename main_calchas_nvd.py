@@ -905,7 +905,7 @@ def calculate_missing_values_dataframe(ts_wmv, years_list, table_name, time_gran
         count = 0
         for index_val, series_val in ts_wmv.iteritems():
             if (int(missing_values_df['Start_Year_Range'][i]) <= index_val.year <=
-                int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
+                    int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
                 count = count + 1
         missing_values_df.iloc[i, missing_values_df.columns.get_loc('Non_Zero_values')] = count
 

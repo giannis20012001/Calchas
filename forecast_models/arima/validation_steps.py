@@ -1,12 +1,13 @@
 import numpy as np
-import scipy
-import scipy.stats as stats
 from math import sqrt
 from pandas import read_csv
 from matplotlib import pyplot
 # Deprecated import: from statsmodels.tsa.arima_model import ARIMA
+from scipy.stats import pearsonr, spearmanr
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import r2_score
 from statsmodels.tsa.arima_model import ARIMAResults
 
 
@@ -92,28 +93,63 @@ def save_fitted_model(csv_file_name):
     print()
 
 
-def calculate_reliability_statistics(expected_vals, predictions):
-    x = np.array(expected_vals)
-    y = np.array(predictions)
-    f = np.var(x, ddof=1) / np.var(y, ddof=1)  # calculate F test statistic
-    dfn = x.size - 1  # define degrees of freedom numerator
-    dfd = y.size - 1  # define degrees of freedom denominator
-    alpha = 0.05  # Or whatever you want your alpha to be.
-    p_value = 1 - scipy.stats.f.cdf(f, dfn, dfd)  # find p-value of F test statistic
+def calculate_forecasting_performance_measures(expected, predictions):
+    y_true = np.array(expected)
+    y_pred = np.array(predictions)
+    forecast_errors = [y_true[i] - y_pred[i] for i in range(len(y_true))]
+    bias = sum(forecast_errors) * 1.0 / len(expected)
+    mae = mean_absolute_error(y_true, y_pred)
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = sqrt(mean_squared_error(y_true, y_pred))
 
-    if p_value > alpha:
-        print("Reject the null hypothesis that Var(X) == Var(Y)")
-    else:
-        print("Cannot reject the null hypothesis that Var(X) == Var(Y)")
-
-    return f, p_value
-
-
-def calculate_correlation_index():
+    print()
+    print('Forecast Errors: %s' % forecast_errors)
+    print("The units of the forecast error are the same as the units of the prediction. "
+          "A forecast error of zero indicates no error, or perfect skill for that forecast.")
+    print()
+    print('Forecast Bias (Mean Forecast Error): %f' % bias)
+    print("The units of the forecast bias are the same as the units of the predictions. "
+          "A forecast bias of zero, or a very small number near zero, shows an unbiased model.")
+    print()
+    print('Mean Absolute Error (MAE): %f' % mae)
+    print("These error values are in the original units of the predicted values. "
+          "A mean absolute error of zero indicates no error.")
+    print()
+    print('Mean Squared Error (MSE): %f' % mse)
+    print("The error values are in squared units of the predicted values. "
+          "A mean squared error of zero indicates perfect skill, or no error.")
+    print()
+    print('Root Mean Squared Error (RMSE): %.3f' % rmse)
+    print("The RMES error values are in the same units as the predictions. "
+          "As with the mean squared error, an RMSE of zero indicates no error.")
     print()
 
 
-def calculate_t_test():
+def calculate_correlation_index(expected, predictions):
+    y_true = np.array(expected)
+    y_pred = np.array(predictions)
+
+    # calculate Pearson's correlation
+    corr, _ = pearsonr(y_true, y_pred)
+    print('Pearsons correlation: %.3f' % corr)
+    print("The coefficient returns a value between -1 and 1 that represents the limits of correlation "
+          "from a full negative correlation to a full positive correlation. A value of 0 means no correlation. "
+          "The value must be interpreted, where often a value below -0.5 or above 0.5 indicates a notable correlation, "
+          "and values below those values suggests a less notable correlation.")
+    print()
+
+    # calculate spearman's correlation
+    corr, _ = spearmanr(y_true, y_pred)
+    print('Spearmans correlation: %.3f' % corr)
+    print("The coefficient returns a value between -1 and 1 that represents the limits of correlation "
+          "from a full negative correlation to a full positive correlation. A value of 0 means no correlation. "
+          "The value must be interpreted, where often a value below -0.5 or above 0.5 indicates a notable correlation, "
+          "and values below those values suggests a less notable correlation.")
+    print()
+
+    # calculate the coefficient of determination,
+    r_sqr = r2_score(y_true, y_pred)
+    print('R^2 (coefficient of determination): %.3f' % r_sqr)
     print()
 
 
@@ -159,11 +195,8 @@ def validate_arima_model(csv_file_name):
         history.append(obs)
         print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
     # report performance
-    rmse = sqrt(mean_squared_error(y, predictions))
-    print('RMSE: %.3f' % rmse)
-    calculate_reliability_statistics(y, predictions)
-    calculate_correlation_index()
-    calculate_t_test()
+    calculate_forecasting_performance_measures(y, predictions)
+    calculate_correlation_index(y, predictions)
     print("Model evaluation finished...")
     print("==========================================================")
     print()
@@ -213,8 +246,8 @@ def validate_arima_model(csv_file_name):
         history.append(obs)
         print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
     # report performance
-    rmse = sqrt(mean_squared_error(y, predictions))
-    print('RMSE: %.3f' % rmse)
+    calculate_forecasting_performance_measures(y, predictions)
+    calculate_correlation_index(y, predictions)
     print("Model evaluation finished...")
     print("==========================================================")
     print()
@@ -264,8 +297,8 @@ def validate_arima_model(csv_file_name):
         history.append(obs)
         print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
     # report performance
-    rmse = sqrt(mean_squared_error(y, predictions))
-    print('RMSE: %.3f' % rmse)
+    calculate_forecasting_performance_measures(y, predictions)
+    calculate_correlation_index(y, predictions)
     print("Model evaluation finished...")
     print("==========================================================")
     print()
