@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from math import sqrt
 from pandas import read_csv
@@ -27,6 +28,7 @@ def save_fitted_model(csv_file_name):
     X = series.values
     X = X.astype('float32')
     # fit model
+    warnings.filterwarnings("ignore")
     model = ARIMA(X, order=(int(p), int(d), int(q)))
     model_fit = model.fit()
     # bias constant, could be calculated from in-sample mean residual
@@ -54,6 +56,7 @@ def save_fitted_model(csv_file_name):
     X = series.values
     X = X.astype('float32')
     # fit model
+    warnings.filterwarnings("ignore")
     model = ARIMA(X, order=(int(p), int(d), int(q)))
     model_fit = model.fit()
     # bias constant, could be calculated from in-sample mean residual
@@ -81,6 +84,7 @@ def save_fitted_model(csv_file_name):
     X = series.values
     X = X.astype('float32')
     # fit model
+    warnings.filterwarnings("ignore")
     model = ARIMA(X, order=(int(p), int(d), int(q)))
     model_fit = model.fit()
     # bias constant, could be calculated from in-sample mean residual
@@ -185,6 +189,7 @@ def validate_arima_model(csv_file_name):
     # rolling forecasts
     for i in range(1, len(y)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         # yhat = bias + float(model_fit.forecast()[0])
@@ -236,6 +241,7 @@ def validate_arima_model(csv_file_name):
     # rolling forecasts
     for i in range(1, len(y)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         # yhat = bias + float(model_fit.forecast()[0])
@@ -287,6 +293,7 @@ def validate_arima_model(csv_file_name):
     # rolling forecasts
     for i in range(1, len(y)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         # yhat = bias + float(model_fit.forecast()[0])

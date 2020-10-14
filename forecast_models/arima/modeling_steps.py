@@ -122,6 +122,7 @@ def manual_arima(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -157,6 +158,7 @@ def manual_arima(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -192,6 +194,7 @@ def manual_arima(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -317,6 +320,7 @@ def residual_errors_plot(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -358,6 +362,7 @@ def residual_errors_plot(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -399,6 +404,7 @@ def residual_errors_plot(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -442,6 +448,7 @@ def residual_acf_errors_plot(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -482,6 +489,7 @@ def residual_acf_errors_plot(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]
@@ -522,6 +530,7 @@ def residual_acf_errors_plot(csv_file_name):
     predictions = list()
     for i in range(len(test)):
         # predict
+        warnings.filterwarnings("ignore")
         model = ARIMA(history, order=(int(p), int(d), int(q)))
         model_fit = model.fit()
         yhat = model_fit.forecast()[0]

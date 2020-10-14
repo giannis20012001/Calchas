@@ -1264,53 +1264,53 @@ def choose_forecast_method(csv_file_name):
                 # print("First split initial dataset to training & validation ones...")
                 # initial_steps.split_dataset(csv_file_name)
             elif choice == 4:  # Choose ARIMA model
-                # print("ARIMA model steps...")
-                # print("First step split initial dataset to training & validation ones...")
-                # initial_steps.split_dataset(csv_file_name)
+                print("ARIMA model steps...")
+                print("First step split initial dataset to training & validation ones...")
+                initial_steps.split_dataset(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Second step create persistence model to establish a baseline of performance...")
+                initial_steps.create_persistence_model_from_dataset(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Third step data analysis through summary statistics and plots...")
+                initial_steps.summary_statistics(csv_file_name)
+                input("Press Enter to continue...")
+                initial_steps.create_line_plots(csv_file_name)
+                input("Press Enter to continue...")
+                initial_steps.create_density_plots(csv_file_name)
+                input("Press Enter to continue...")
+                # initial_steps.create_boxplots_plots(csv_file_name)
                 # input("Press Enter to continue...")
-                #
-                # print("Second step create persistence model to establish a baseline of performance...")
-                # initial_steps.create_persistence_model_from_dataset(csv_file_name)
+                # ======================================================================================================
+                # Modeling steps
+                # ======================================================================================================
+                print("Fourth step statistical test for the stationarity of the time series...")
+                modeling_steps.check_stationarity(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Fifth step ACF/PACF plots to determine ARIMA's (p, q)...")
+                modeling_steps.acf_pacf_plots(csv_file_name)
+                input("Press Enter to continue...")
+
+                print("Sixth step run manual ARIMA for specific (p, q, d) values...")
+                modeling_steps.manual_arima(csv_file_name)
+                input("Press Enter to continue...")
+
+                # print("Seventh step run grid search ARIMA to determine best (p, q, d) among an array of values...")
+                # modeling_steps.grid_search_arima(csv_file_name)
                 # input("Press Enter to continue...")
-                #
-                # print("Third step data analysis through summary statistics and plots...")
-                # initial_steps.summary_statistics(csv_file_name)
-                # input("Press Enter to continue...")
-                # initial_steps.create_line_plots(csv_file_name)
-                # input("Press Enter to continue...")
-                # initial_steps.create_density_plots(csv_file_name)
-                # input("Press Enter to continue...")
-                # # initial_steps.create_boxplots_plots(csv_file_name)
-                # # input("Press Enter to continue...")
-                # # ======================================================================================================
-                # # Modeling steps
-                # # ======================================================================================================
-                # print("Fourth step statistical test for the stationarity of the time series...")
-                # modeling_steps.check_stationarity(csv_file_name)
-                # input("Press Enter to continue...")
-                #
-                # print("Fifth step ACF/PACF plots to determine ARIMA's (p, q)...")
-                # modeling_steps.acf_pacf_plots(csv_file_name)
-                # input("Press Enter to continue...")
-                #
-                # print("Sixth step run manual ARIMA for specific (p, q, d) values...")
-                # modeling_steps.manual_arima(csv_file_name)
-                # input("Press Enter to continue...")
-                #
-                # # print("Seventh step run grid search ARIMA to determine best (p, q, d) among an array of values...")
-                # # modeling_steps.grid_search_arima(csv_file_name)
-                # # input("Press Enter to continue...")
-                #
-                # print("Eighth step plot residual errors plots...")
-                # modeling_steps.residual_errors_plot(csv_file_name)
-                # modeling_steps.residual_acf_errors_plot(csv_file_name)
-                # input("Press Enter to continue...")
-                # # ======================================================================================================
-                # # Validation steps
-                # # ======================================================================================================
-                # print("Ninth step save fitted model...")
-                # validation_steps.save_fitted_model(csv_file_name)
-                # input("Press Enter to continue...")
+
+                print("Eighth step plot residual errors plots...")
+                modeling_steps.residual_errors_plot(csv_file_name)
+                modeling_steps.residual_acf_errors_plot(csv_file_name)
+                input("Press Enter to continue...")
+                # ======================================================================================================
+                # Validation steps
+                # ======================================================================================================
+                print("Ninth step save fitted model...")
+                validation_steps.save_fitted_model(csv_file_name)
+                input("Press Enter to continue...")
 
                 print("Tenth step validate fitted model...")
                 validation_steps.validate_arima_model(csv_file_name)
