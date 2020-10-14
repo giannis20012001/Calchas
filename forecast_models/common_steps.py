@@ -3,7 +3,10 @@ from pandas import Grouper
 from pandas import read_csv
 from matplotlib import pyplot
 from pandas import DataFrame, concat
+from statsmodels.tsa.stattools import adfuller
 from sklearn.metrics import mean_squared_error
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.graphics.tsaplots import plot_pacf
 
 
 # split into a training and validation dataset
@@ -274,4 +277,93 @@ def create_boxplots_plots(csv_file_name):
 
     appended_data = concat(appended_data)
     appended_data.boxplot()
+    pyplot.show()
+
+
+# statistical test for the stationarity of the time series
+def check_stationarity(csv_file_name):
+    # load data for 70% - 30%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+
+    # check if stationary
+    result = adfuller(series)
+    print()
+    print("==========================================================")
+    print("For 70% - 30% we have...")
+    print('ADF Statistic: %f' % result[0])
+    print('p-value: %f' % result[1])
+    print('Critical Values:')
+    for key, value in result[4].items():
+        print('\t%s: %.3f' % (key, value))
+
+    print("==========================================================")
+    print()
+
+    # load data for 80% - 20%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+
+    # check if stationary
+    result = adfuller(series)
+    print()
+    print("==========================================================")
+    print("For 80% - 20% we have...")
+    print('ADF Statistic: %f' % result[0])
+    print('p-value: %f' % result[1])
+    print('Critical Values:')
+    for key, value in result[4].items():
+        print('\t%s: %.3f' % (key, value))
+
+    print("==========================================================")
+    print()
+
+    # load data for 90% - 10%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+
+    # check if stationary
+    result = adfuller(series)
+    print()
+    print("==========================================================")
+    print("For 90% - 10% we have...")
+    print('ADF Statistic: %f' % result[0])
+    print('p-value: %f' % result[1])
+    print('Critical Values:')
+    for key, value in result[4].items():
+        print('\t%s: %.3f' % (key, value))
+
+    print("==========================================================")
+    print()
+
+
+def acf_pacf_plots(csv_file_name):
+    # load data for 70% - 30%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    pyplot.figure()
+    pyplot.subplot(211)
+    plot_acf(series, lags=50, ax=pyplot.gca())
+    pyplot.subplot(212)
+    plot_pacf(series, lags=50, ax=pyplot.gca())
+    pyplot.show()
+
+    # load data for 80% - 20%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    pyplot.figure()
+    pyplot.subplot(211)
+    plot_acf(series, lags=50, ax=pyplot.gca())
+    pyplot.subplot(212)
+    plot_pacf(series, lags=50, ax=pyplot.gca())
+    pyplot.show()
+
+    # load data for 90% - 10%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    pyplot.figure()
+    pyplot.subplot(211)
+    plot_acf(series, lags=50, ax=pyplot.gca())
+    pyplot.subplot(212)
+    plot_pacf(series, lags=50, ax=pyplot.gca())
     pyplot.show()

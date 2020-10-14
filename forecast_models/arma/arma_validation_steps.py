@@ -3,39 +3,37 @@ import numpy as np
 from math import sqrt
 from pandas import read_csv
 from matplotlib import pyplot
-# Deprecated import: from statsmodels.tsa.arima_model import ARIMA
+from sklearn.metrics import r2_score
 from scipy.stats import pearsonr, spearmanr
-from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.arima_model import ARMA
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import r2_score
 from statsmodels.tsa.arima_model import ARIMAResults
 
 
-def save_fitted_model(csv_file_name):
+def save_fitted_model_arma(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
                       index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 70% - 30% we have...")
-    print("Enter (p,  d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    print("Enter (p, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    d = input("Enter d value (differencing --> d): ")
     q = input("Enter q value (Moving Average (MA) --> q): ")
-    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print('ARMA(%d, %d)' % (int(p), int(q)))
     # prepare data
     X = series.values
     X = X.astype('float32')
     # fit model
     warnings.filterwarnings("ignore")
-    model = ARIMA(X, order=(int(p), int(d), int(q)))
-    model_fit = model.fit()
+    model = ARMA(X, order=(int(p), int(q)))
+    model_fit = model.fit(disp=False)
     # bias constant, could be calculated from in-sample mean residual
     # bias = 1.081624
     # save model
     print("Saving model...")
-    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_70_30.pkl')
+    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arma_70_30.pkl')
     # numpy.save('model_bias.npy', [bias])
     print("==========================================================")
     print()
@@ -47,23 +45,22 @@ def save_fitted_model(csv_file_name):
     print()
     print("==========================================================")
     print("For 80% - 20% we have...")
-    print("Enter (p,  d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    print("Enter (p, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    d = input("Enter d value (differencing --> d): ")
     q = input("Enter q value (Moving Average (MA) --> q): ")
-    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print('ARMA(%d, %d)' % (int(p), int(q)))
     # prepare data
     X = series.values
     X = X.astype('float32')
     # fit model
     warnings.filterwarnings("ignore")
-    model = ARIMA(X, order=(int(p), int(d), int(q)))
-    model_fit = model.fit()
+    model = ARMA(X, order=(int(p), int(q)))
+    model_fit = model.fit(disp=False)
     # bias constant, could be calculated from in-sample mean residual
     # bias = 1.081624
     # save model
     print("Saving model...")
-    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_80_20.pkl')
+    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arma_80_20.pkl')
     # numpy.save('model_bias.npy', [bias])
     print("==========================================================")
     print()
@@ -75,23 +72,22 @@ def save_fitted_model(csv_file_name):
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
-    print("Enter (p,  d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    print("Enter (p, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    d = input("Enter d value (differencing --> d): ")
     q = input("Enter q value (Moving Average (MA) --> q): ")
-    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print('ARMA(%d, %d)' % (int(p), int(q)))
     # prepare data
     X = series.values
     X = X.astype('float32')
     # fit model
     warnings.filterwarnings("ignore")
-    model = ARIMA(X, order=(int(p), int(d), int(q)))
-    model_fit = model.fit()
+    model = ARMA(X, order=(int(p), int(q)))
+    model_fit = model.fit(disp=False)
     # bias constant, could be calculated from in-sample mean residual
     # bias = 1.081624
     # save model
     print("Saving model...")
-    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_90_10.pkl')
+    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arma_90_10.pkl')
     # numpy.save('model_bias.npy', [bias])
     print("==========================================================")
     print()
@@ -129,6 +125,7 @@ def calculate_forecasting_performance_measures(expected, predictions):
     print()
 
 
+# noinspection PyTypeChecker
 def calculate_correlation_index(expected, predictions):
     y_true = np.array(expected)
     y_pred = np.array(predictions)
@@ -157,7 +154,7 @@ def calculate_correlation_index(expected, predictions):
     print()
 
 
-def validate_arima_model(csv_file_name):
+def validate_arma_model(csv_file_name):
     # load data for 70% - 30%
     dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
                        index_col=0, parse_dates=True, squeeze=True)
@@ -169,14 +166,13 @@ def validate_arima_model(csv_file_name):
     print()
     print("==========================================================")
     print("For 70% - 30% we have...")
-    print("Enter (p,  d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    print("Enter (p, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    d = input("Enter d value (differencing --> d): ")
     q = input("Enter q value (Moving Average (MA) --> q): ")
-    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print('ARMA(%d, %d)' % (int(p), int(q)))
     # load model
     print("Loading model...")
-    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_70_30.pkl')
+    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arma_70_30.pkl')
     # bias = numpy.load('model_bias.npy')
     # make first prediction
     print("Starting model evaluation...")
@@ -190,8 +186,8 @@ def validate_arima_model(csv_file_name):
     for i in range(1, len(y)):
         # predict
         warnings.filterwarnings("ignore")
-        model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit()
+        model = ARMA(X, order=(int(p), int(q)))
+        model_fit = model.fit(disp=False)
         # yhat = bias + float(model_fit.forecast()[0])
         yhat = float(model_fit.forecast()[0])
         predictions.append(yhat)
@@ -221,14 +217,13 @@ def validate_arima_model(csv_file_name):
     print()
     print("==========================================================")
     print("For 80% - 20% we have...")
-    print("Enter (p,  d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    print("Enter (p, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    d = input("Enter d value (differencing --> d): ")
     q = input("Enter q value (Moving Average (MA) --> q): ")
-    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print('ARMA(%d, %d)' % (int(p), int(q)))
     # load model
     print("Loading model...")
-    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_80_20.pkl')
+    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arma_80_20.pkl')
     # bias = numpy.load('model_bias.npy')
     # make first prediction
     print("Starting model evaluation...")
@@ -242,8 +237,8 @@ def validate_arima_model(csv_file_name):
     for i in range(1, len(y)):
         # predict
         warnings.filterwarnings("ignore")
-        model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit()
+        model = ARMA(X, order=(int(p), int(q)))
+        model_fit = model.fit(disp=False)
         # yhat = bias + float(model_fit.forecast()[0])
         yhat = float(model_fit.forecast()[0])
         predictions.append(yhat)
@@ -273,14 +268,13 @@ def validate_arima_model(csv_file_name):
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
-    print("Enter (p,  d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    print("Enter (p, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
-    d = input("Enter d value (differencing --> d): ")
     q = input("Enter q value (Moving Average (MA) --> q): ")
-    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print('ARMA(%d, %d)' % (int(p), int(q)))
     # load model
     print("Loading model...")
-    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_90_10.pkl')
+    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arma_90_10.pkl')
     # bias = numpy.load('model_bias.npy')
     # make first prediction
     print("Starting model evaluation...")
@@ -294,8 +288,8 @@ def validate_arima_model(csv_file_name):
     for i in range(1, len(y)):
         # predict
         warnings.filterwarnings("ignore")
-        model = ARIMA(history, order=(int(p), int(d), int(q)))
-        model_fit = model.fit()
+        model = ARMA(X, order=(int(p), int(q)))
+        model_fit = model.fit(disp=False)
         # yhat = bias + float(model_fit.forecast()[0])
         yhat = float(model_fit.forecast()[0])
         predictions.append(yhat)
