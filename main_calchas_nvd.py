@@ -21,8 +21,11 @@ from sqlalchemy import create_engine
 from sklearn.impute import KNNImputer
 from sqlalchemy.orm import sessionmaker
 from forecast_models import common_steps
+from forecast_models.multilayer_perceptron_models import mlp_modeling
+from forecast_models.convolutional_neural_network_models import cnn_modeling
+from forecast_models.arma_models import arma_modeling_steps, arma_validation_steps
 from forecast_models.arima import arima_modeling_steps, arima_validation_steps
-from forecast_models.arma import arma_modeling_steps, arma_validation_steps
+from forecast_models.recurrent_neural_network_models import lstm_modeling, cnn_lstm_modeling, conv_lstm_modeling
 
 
 # ======================================================================================================================
@@ -1282,6 +1285,11 @@ def choose_forecast_method(csv_file_name):
                                "Enter 4 for ARMA model...\n"
                                "Enter 5 for ARIMA model...\n"
                                "Enter 6 for polynomial regression model...\n"
+                               "Enter 7 for Multilayer perceptron model...\n"
+                               "Enter 8 for Convolutional Neural Network model...\n"
+                               "Enter 9 for Long Short-Term Memory model...\n"
+                               "Enter 10 for Convolutional Neural Network - Long Short-Term Memory hybrid model...\n"
+                               "Enter 11 for Convolutional Long Short-Term Memory hybrid model...\n"
                                "Enter -1 to exit third step subroutine execution...\n"))
         except ValueError:
             print("You entered a wrong choice...\n\n")
@@ -1346,7 +1354,47 @@ def choose_forecast_method(csv_file_name):
                 arima_validation_steps.validate_arima_model(csv_file_name)
                 input("Press Enter to continue...")
             elif choice == 6:  # Choose polynomial regression model
-                print("Polynomial regression steps...")
+                print("Polynomial regression model steps...")
+            elif choice == 7:  # Choose MLP model
+                print("Multilayer perceptron model steps...")
+                # ======================================================================================================
+                # Modeling & validation steps
+                # ======================================================================================================
+                print("Sixth step run MLP & validate fitted model...")
+                mlp_modeling.repeat_evaluate(csv_file_name)
+                input("Press Enter to continue...")
+            elif choice == 8:  # Choose CNN model
+                print("Convolutional Neural Network model steps...")
+                # ======================================================================================================
+                # Modeling & validation steps
+                # ======================================================================================================
+                print("Sixth step run CNN & validate fitted model...")
+                cnn_modeling.repeat_evaluate(csv_file_name)
+                input("Press Enter to continue...")
+            elif choice == 9:  # Choose LSTM model
+                print("Long Short-Term Memory model steps...")
+                # ======================================================================================================
+                # Modeling & validation steps
+                # ======================================================================================================
+                print("Sixth step run LSTM & validate fitted model...")
+                cnn_lstm_modeling.repeat_evaluate()
+                input("Press Enter to continue...")
+            elif choice == 10:  # Choose CNN-LSTM model
+                print("Convolutional Neural Network - Long Short-Term Memory hybrid model steps...")
+                # ======================================================================================================
+                # Modeling & validation steps
+                # ======================================================================================================
+                print("Sixth step run CNN-LSTM hybrid & validate fitted model...")
+
+                input("Press Enter to continue...")
+            elif choice == 11:  # Choose ConvLSTM model
+                print("Convolutional Long Short-Term Memory hybrid model steps...")
+                # ======================================================================================================
+                # Modeling & validation steps
+                # ======================================================================================================
+                print("Sixth step run ConvLSTM hybrid & validate fitted model...")
+
+                input("Press Enter to continue...")
             elif choice == -1:
                 print("Exiting current fifth step subroutine execution...\n\n")
                 break

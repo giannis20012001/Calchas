@@ -4,12 +4,14 @@ gzip
 json
 scipy
 numpy
+keras
 pandas
 shutil
 pynput
 sklearn
 datetime
 requests
+tensorflow
 sqlalchemy
 matplotlib
 statsmodels

@@ -1,10 +1,13 @@
 # check the installation/versions of key python libraries
 import scipy
 import numpy
-import matplotlib
+import keras
 import pandas
-import statsmodels
 import sklearn
+import matplotlib
+import statsmodels
+import tensorflow
+
 
 # scipy
 print('scipy: %s' % scipy.__version__)
@@ -18,3 +21,7 @@ print('pandas: %s' % pandas.__version__)
 print('statsmodels: %s' % statsmodels.__version__)
 # scikit-learn
 print('sklearn: %s' % sklearn.__version__)
+# keras
+print('keras: %s' % keras.__version__)
+# tensorflow
+print('tensorflow: %s' % tensorflow.__version__)
