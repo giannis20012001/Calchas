@@ -119,6 +119,42 @@ def manual_arima(csv_file_name):
     print("==========================================================")
     print()
 
+    # load data for 95% - 5%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 95% - 5% we have...")
+    print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    p = input("Enter p value (Autoregression (AR) --> p): ")
+    d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
+    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    # prepare data
+    X = series.values
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    # walk-forward validation
+    history = [x for x in train]
+    predictions = list()
+    for i in range(len(test)):
+        # predict
+        warnings.filterwarnings("ignore")
+        model = ARIMA(history, order=(int(p), int(d), int(q)))
+        model_fit = model.fit()
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        # observation
+        obs = test[i]
+        history.append(obs)
+        print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
+    # report performance
+    rmse = sqrt(mean_squared_error(test, predictions))
+    print('RMSE: %.3f' % rmse)
+    print("==========================================================")
+    print()
+
 
 # evaluate an ARIMA model for a given order (p,d,q) and return RMSE
 def evaluate_arima_model(X, arima_order):
@@ -196,6 +232,21 @@ def grid_search_arima(csv_file_name):
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
+    # evaluate parameters
+    p_values = range(0, 13)
+    d_values = range(0, 4)
+    q_values = range(0, 13)
+    warnings.filterwarnings("ignore")
+    evaluate_models(series.values, p_values, d_values, q_values)
+    print("==========================================================")
+    print()
+
+    # load data for 95% - 5%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 95% - 5% we have...")
     # evaluate parameters
     p_values = range(0, 13)
     d_values = range(0, 4)
@@ -333,6 +384,48 @@ def residual_errors_plot_arima(csv_file_name):
     residuals.plot(kind='kde', ax=pyplot.gca())
     pyplot.show()
 
+    # load data for 95% - 5%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 95% - 5% we have...")
+    print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    p = input("Enter p value (Autoregression (AR) --> p): ")
+    d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
+    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print("==========================================================")
+    print()
+    # prepare data
+    X = series.values
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    # walk-forward validation
+    history = [x for x in train]
+    predictions = list()
+    for i in range(len(test)):
+        # predict
+        warnings.filterwarnings("ignore")
+        model = ARIMA(history, order=(int(p), int(d), int(q)))
+        model_fit = model.fit()
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        # observation
+        obs = test[i]
+        history.append(obs)
+    # errors
+    residuals = [test[i] - predictions[i] for i in range(len(test))]
+    residuals = DataFrame(residuals)
+    print(residuals.describe())
+    pyplot.figure()
+    pyplot.subplot(211)
+    residuals.hist(ax=pyplot.gca())
+    pyplot.subplot(212)
+    residuals.plot(kind='kde', ax=pyplot.gca())
+    pyplot.show()
+
 
 def residual_acf_errors_plot_arima(csv_file_name):
     # load data for 70% - 30%
@@ -423,6 +516,47 @@ def residual_acf_errors_plot_arima(csv_file_name):
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
+    print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    p = input("Enter p value (Autoregression (AR) --> p): ")
+    d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
+    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    print("==========================================================")
+    print()
+    # prepare data
+    X = series.values
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    # walk-forward validation
+    history = [x for x in train]
+    predictions = list()
+    for i in range(len(test)):
+        # predict
+        warnings.filterwarnings("ignore")
+        model = ARIMA(history, order=(int(p), int(d), int(q)))
+        model_fit = model.fit()
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        # observation
+        obs = test[i]
+        history.append(obs)
+    # errors
+    residuals = [test[i] - predictions[i] for i in range(len(test))]
+    residuals = DataFrame(residuals)
+    pyplot.figure()
+    pyplot.subplot(211)
+    plot_acf(residuals, lags=25, ax=pyplot.gca())
+    pyplot.subplot(212)
+    plot_pacf(residuals, lags=25, ax=pyplot.gca())
+    pyplot.show()
+
+# load data for 95% - 5%
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 95% - 5% we have...")
     print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
     p = input("Enter p value (Autoregression (AR) --> p): ")
     d = input("Enter d value (differencing --> d): ")
