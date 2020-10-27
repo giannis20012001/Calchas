@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from glob import glob
 from os import listdir
 from db_models import *
+from pandas import concat
 from numpy import nan, isnan
 from pandas import DataFrame
 from os.path import isfile, join
@@ -23,7 +24,6 @@ from sqlalchemy.orm import sessionmaker
 from forecast_models import common_steps
 from forecast_models.multilayer_perceptron_models import mlp_modeling
 from forecast_models.convolutional_neural_network_models import cnn_modeling
-from forecast_models.arma_models import arma_modeling_steps, arma_validation_steps
 from forecast_models.arima import arima_modeling_steps, arima_validation_steps
 from forecast_models.recurrent_neural_network_models import lstm_modeling, cnn_lstm_modeling, conv_lstm_modeling
 
@@ -911,7 +911,7 @@ def calculate_missing_values_dataframe(ts_wmv, years_list, table_name, time_gran
         count = 0
         for index_val, series_val in ts_wmv.iteritems():
             if (int(missing_values_df['Start_Year_Range'][i]) <= index_val.year <=
-                    int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
+                int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
                 count = count + 1
         missing_values_df.iloc[i, missing_values_df.columns.get_loc('Non_Zero_values')] = count
 
@@ -1021,16 +1021,36 @@ def check_missing_value_percentage(ts, missing_values):
     return mv_flag, missing_values_percentage_threshold, start_year, end_year
 
 
+# transform list into supervised learning format
+def series_to_supervised(data, n_in=1, n_out=1):
+    df = DataFrame(data)
+    cols = list()
+    # input sequence (t-n, ... t-1)
+    for i in range(n_in, 0, -1):
+        cols.append(df.shift(i))
+    # forecast sequence (t, t+1, ... t+n)
+    for i in range(0, n_out):
+        cols.append(df.shift(-i))
+    # put it all together
+    agg = concat(cols, axis=1)
+
+    return agg.values
+
+
 def fill_missing_values(ts):
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
-    # define imputer
-    imputer = KNNImputer()
-    temp = ts.values.reshape(-1, 1)
-    # fit on the dataset
-    imputer.fit(temp)
-    # transform the dataset and cast table from 2D to 1D
-    Xtrans = imputer.transform(temp).flatten()
-    ts.iloc[:] = Xtrans
+    # temp = ts.values.reshape(-1, 1)
+    Xtrans = series_to_supervised(ts.values, n_in=3)
+    # Define imputer
+    imputer = KNNImputer(n_neighbors=3)
+    # Fit on the dataset
+    imputer.fit(Xtrans)
+    # Transform the dataset
+    X_filled_knn = imputer.transform(Xtrans)
+    # Find total column number for ndarray
+    columns = len(X_filled_knn[0])
+    # Get last column
+    ts.iloc[:] = X_filled_knn[:, (columns - 1)]
     # summarize total missing
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
 
@@ -1089,19 +1109,6 @@ def create_input_dataset_for_forecast_methods(table_name):
             print("Missing values percentage threshold used is 20%...")
         elif missing_values_percentage_threshold == 10:
             print("Missing values percentage threshold used is 10%...")
-    # Check for reducing (rolling window) year ranges
-    # i = 0
-    # while not eligible_range_for_day and i < (len(years_list) - 1):
-    #     ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
-    #     eligible_range_for_day, missing_values_percentage_threshold, start_year, end_year = \
-    #         check_missing_value_percentage(ts, missing_values)
-    #     if eligible_range_for_day:
-    #         if missing_values_percentage_threshold == 20:
-    #             print("Missing values percentage threshold used is 20%...")
-    #         elif missing_values_percentage_threshold == 10:
-    #             print("Missing values percentage threshold used is 10%...")
-    #         break
-    #     i += 1
 
     if eligible_range_for_day:
         # TODO: Implement part to impute missing values & save to csv method
@@ -1152,19 +1159,6 @@ def create_input_dataset_for_forecast_methods(table_name):
                 print("Missing values percentage threshold used is 20%...")
             elif missing_values_percentage_threshold == 10:
                 print("Missing values percentage threshold used is 10%...")
-        # Check for reducing (rolling window) year ranges
-        # i = 0
-        # while not eligible_range_for_week and i < (len(years_list) - 1):
-        #     ts = ts.drop(ts.index[ts.index.year.isin([int(years_list[i])])])
-        #     eligible_range_for_week, missing_values_percentage_threshold, start_year, end_year = \
-        #         check_missing_value_percentage(ts, missing_values)
-        #     if eligible_range_for_week:
-        #         if missing_values_percentage_threshold == 20:
-        #             print("Missing values percentage threshold used is 20%...")
-        #         elif missing_values_percentage_threshold == 10:
-        #             print("Missing values percentage threshold used is 10%...")
-        #         break
-        #     i += 1
 
         if eligible_range_for_week:
             print("Week time_granularity was found eligible...")
@@ -1282,14 +1276,13 @@ def choose_forecast_method(csv_file_name):
             choice = int(input("Enter 1 for linear model...\n"
                                "Enter 2 for autoregression model...\n"
                                "Enter 3 for moving average model...\n"
-                               "Enter 4 for ARMA model...\n"
-                               "Enter 5 for ARIMA model...\n"
-                               "Enter 6 for polynomial regression model...\n"
-                               "Enter 7 for Multilayer perceptron model...\n"
-                               "Enter 8 for Convolutional Neural Network model...\n"
-                               "Enter 9 for Long Short-Term Memory model...\n"
-                               "Enter 10 for Convolutional Neural Network - Long Short-Term Memory hybrid model...\n"
-                               "Enter 11 for Convolutional Long Short-Term Memory hybrid model...\n"
+                               "Enter 4 for ARIMA model...\n"
+                               "Enter 5 for polynomial regression model...\n"
+                               "Enter 6 for Multilayer perceptron model...\n"
+                               "Enter 7 for Convolutional Neural Network model...\n"
+                               "Enter 8 for Long Short-Term Memory model...\n"
+                               "Enter 9 for Convolutional Neural Network - Long Short-Term Memory hybrid model...\n"
+                               "Enter 10 for Convolutional Long Short-Term Memory hybrid model...\n"
                                "Enter -1 to exit third step subroutine execution...\n"))
         except ValueError:
             print("You entered a wrong choice...\n\n")
@@ -1303,30 +1296,7 @@ def choose_forecast_method(csv_file_name):
                 print("Autoregression model steps...")
             elif choice == 3:  # Choose Moving average model
                 print("Moving average model steps...")
-            elif choice == 4:  # Choose ARMA model
-                print("ARMA model steps...")
-                # ======================================================================================================
-                # Modeling steps
-                # ======================================================================================================
-                print("Sixth step run manual ARIMA for specific (p, q, d) values...")
-                arma_modeling_steps.manual_arma(csv_file_name)
-                input("Press Enter to continue...")
-
-                print("Eighth step plot residual errors plots...")
-                arma_modeling_steps.residual_errors_plot_arma(csv_file_name)
-                arma_modeling_steps.residual_acf_errors_plot_arma(csv_file_name)
-                input("Press Enter to continue...")
-                # ======================================================================================================
-                # Validation steps
-                # ======================================================================================================
-                print("Ninth step save fitted model...")
-                arma_validation_steps.save_fitted_model_arma(csv_file_name)
-                input("Press Enter to continue...")
-
-                print("Tenth step validate fitted model...")
-                arma_validation_steps.validate_arma_model(csv_file_name)
-                input("Press Enter to continue...")
-            elif choice == 5:  # Choose ARIMA model
+            elif choice == 4:  # Choose ARIMA model
                 print("ARIMA model steps...")
                 # ======================================================================================================
                 # Modeling steps
@@ -1339,10 +1309,10 @@ def choose_forecast_method(csv_file_name):
                 # arima_modeling_steps.grid_search_arima(csv_file_name)
                 # input("Press Enter to continue...")
 
-                print("Eighth step plot residual errors plots...")
-                arima_modeling_steps.residual_errors_plot_arima(csv_file_name)
-                arima_modeling_steps.residual_acf_errors_plot_arima(csv_file_name)
-                input("Press Enter to continue...")
+                # print("Eighth step plot residual errors plots...")
+                # arima_modeling_steps.residual_errors_plot_arima(csv_file_name)
+                # arima_modeling_steps.residual_acf_errors_plot_arima(csv_file_name)
+                # input("Press Enter to continue...")
                 # ======================================================================================================
                 # Validation steps
                 # ======================================================================================================
@@ -1353,9 +1323,9 @@ def choose_forecast_method(csv_file_name):
                 print("Tenth step validate fitted model...")
                 arima_validation_steps.validate_arima_model(csv_file_name)
                 input("Press Enter to continue...")
-            elif choice == 6:  # Choose polynomial regression model
+            elif choice == 5:  # Choose polynomial regression model
                 print("Polynomial regression model steps...")
-            elif choice == 7:  # Choose MLP model
+            elif choice == 6:  # Choose MLP model
                 print("Multilayer perceptron model steps...")
                 # ======================================================================================================
                 # Modeling & validation steps
@@ -1363,7 +1333,7 @@ def choose_forecast_method(csv_file_name):
                 print("Sixth step run MLP & validate fitted model...")
                 mlp_modeling.repeat_evaluate(csv_file_name)
                 input("Press Enter to continue...")
-            elif choice == 8:  # Choose CNN model
+            elif choice == 7:  # Choose CNN model
                 print("Convolutional Neural Network model steps...")
                 # ======================================================================================================
                 # Modeling & validation steps
@@ -1371,7 +1341,7 @@ def choose_forecast_method(csv_file_name):
                 print("Sixth step run CNN & validate fitted model...")
                 cnn_modeling.repeat_evaluate(csv_file_name)
                 input("Press Enter to continue...")
-            elif choice == 9:  # Choose LSTM model
+            elif choice == 8:  # Choose LSTM model
                 print("Long Short-Term Memory model steps...")
                 # ======================================================================================================
                 # Modeling & validation steps
@@ -1379,7 +1349,7 @@ def choose_forecast_method(csv_file_name):
                 print("Sixth step run LSTM & validate fitted model...")
                 cnn_lstm_modeling.repeat_evaluate()
                 input("Press Enter to continue...")
-            elif choice == 10:  # Choose CNN-LSTM model
+            elif choice == 9:  # Choose CNN-LSTM model
                 print("Convolutional Neural Network - Long Short-Term Memory hybrid model steps...")
                 # ======================================================================================================
                 # Modeling & validation steps
@@ -1387,7 +1357,7 @@ def choose_forecast_method(csv_file_name):
                 print("Sixth step run CNN-LSTM hybrid & validate fitted model...")
 
                 input("Press Enter to continue...")
-            elif choice == 11:  # Choose ConvLSTM model
+            elif choice == 10:  # Choose ConvLSTM model
                 print("Convolutional Long Short-Term Memory hybrid model steps...")
                 # ======================================================================================================
                 # Modeling & validation steps
