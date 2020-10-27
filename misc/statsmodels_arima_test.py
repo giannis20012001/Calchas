@@ -39,6 +39,7 @@ pd.set_option('display.width', 1000)
 
 # Import data
 df = pd.read_csv('../data/datasets/test_datasets/international-airline-passengers.csv', header=None)
+df.columns = ['year', 'passengers']
 df['year'] = pd.to_datetime(df['year'], format='%Y-%m')
 y = df.set_index('year')
 ts_log = np.log(y)

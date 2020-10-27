@@ -441,9 +441,9 @@ def acf_pacf_plots(csv_file_name):
                       index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(series, lags=50, ax=pyplot.gca())
+    plot_acf(series, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(series, lags=50, ax=pyplot.gca())
+    plot_pacf(series, ax=pyplot.gca())
     pyplot.show()
 
     # load data for 80% - 20%
@@ -451,9 +451,9 @@ def acf_pacf_plots(csv_file_name):
                       index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(series, lags=50, ax=pyplot.gca())
+    plot_acf(series, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(series, lags=50, ax=pyplot.gca())
+    plot_pacf(series, ax=pyplot.gca())
     pyplot.show()
 
     # load data for 90% - 10%
@@ -461,9 +461,9 @@ def acf_pacf_plots(csv_file_name):
                       index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(series, lags=50, ax=pyplot.gca())
+    plot_acf(series, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(series, lags=50, ax=pyplot.gca())
+    plot_pacf(series, ax=pyplot.gca())
     pyplot.show()
 
     # load data for 95% - 5%
@@ -471,7 +471,7 @@ def acf_pacf_plots(csv_file_name):
                       index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(series, lags=50, ax=pyplot.gca())
+    plot_acf(series, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(series, lags=50, ax=pyplot.gca())
+    plot_pacf(series, ax=pyplot.gca())
     pyplot.show()

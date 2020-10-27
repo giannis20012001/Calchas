@@ -1309,10 +1309,10 @@ def choose_forecast_method(csv_file_name):
                 # arima_modeling_steps.grid_search_arima(csv_file_name)
                 # input("Press Enter to continue...")
 
-                # print("Eighth step plot residual errors plots...")
-                # arima_modeling_steps.residual_errors_plot_arima(csv_file_name)
-                # arima_modeling_steps.residual_acf_errors_plot_arima(csv_file_name)
-                # input("Press Enter to continue...")
+                print("Eighth step plot residual errors plots...")
+                arima_modeling_steps.residual_errors_plot_arima(csv_file_name)
+                arima_modeling_steps.residual_acf_errors_plot_arima(csv_file_name)
+                input("Press Enter to continue...")
                 # ======================================================================================================
                 # Validation steps
                 # ======================================================================================================
@@ -1347,7 +1347,7 @@ def choose_forecast_method(csv_file_name):
                 # Modeling & validation steps
                 # ======================================================================================================
                 print("Sixth step run LSTM & validate fitted model...")
-                cnn_lstm_modeling.repeat_evaluate()
+                cnn_lstm_modeling.repeat_evaluate(csv_file_name)
                 input("Press Enter to continue...")
             elif choice == 9:  # Choose CNN-LSTM model
                 print("Convolutional Neural Network - Long Short-Term Memory hybrid model steps...")

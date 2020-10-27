@@ -464,9 +464,9 @@ def residual_acf_errors_plot_arima(csv_file_name):
     residuals = DataFrame(residuals)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(residuals, lags=25, ax=pyplot.gca())
+    plot_acf(residuals, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(residuals, lags=25, ax=pyplot.gca())
+    plot_pacf(residuals, ax=pyplot.gca())
     pyplot.show()
 
     # load data for 80% - 20%
@@ -505,9 +505,9 @@ def residual_acf_errors_plot_arima(csv_file_name):
     residuals = DataFrame(residuals)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(residuals, lags=25, ax=pyplot.gca())
+    plot_acf(residuals, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(residuals, lags=25, ax=pyplot.gca())
+    plot_pacf(residuals, ax=pyplot.gca())
     pyplot.show()
 
     # load data for 90% - 10%
@@ -546,9 +546,9 @@ def residual_acf_errors_plot_arima(csv_file_name):
     residuals = DataFrame(residuals)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(residuals, lags=25, ax=pyplot.gca())
+    plot_acf(residuals, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(residuals, lags=25, ax=pyplot.gca())
+    plot_pacf(residuals, ax=pyplot.gca())
     pyplot.show()
 
 # load data for 95% - 5%
@@ -587,7 +587,7 @@ def residual_acf_errors_plot_arima(csv_file_name):
     residuals = DataFrame(residuals)
     pyplot.figure()
     pyplot.subplot(211)
-    plot_acf(residuals, lags=25, ax=pyplot.gca())
+    plot_acf(residuals, ax=pyplot.gca())
     pyplot.subplot(212)
-    plot_pacf(residuals, lags=25, ax=pyplot.gca())
+    plot_pacf(residuals, ax=pyplot.gca())
     pyplot.show()

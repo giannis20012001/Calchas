@@ -5,16 +5,252 @@ from pandas import read_csv
 from matplotlib import pyplot
 from sklearn.metrics import r2_score
 from scipy.stats import pearsonr, spearmanr
-# Deprecated import: from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from statsmodels.tsa.arima_model import ARIMAResults
 
 
+# split into a training and validation dataset
+def split_dataset(csv_file_name):
+    series = read_csv('../data/datasets/test_datasets/water.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
+    # Split dataset 70% - 30%
+    split_point = int(len(series) * 0.7)
+    dataset, validation = series[0:split_point], series[split_point:]
+    print()
+    print("==========================================================")
+    print("For 70% - 30% we have...")
+    print('Observations: %d' % (len(series)))
+    print('Dataset %d, Validation %d' % (len(dataset), len(validation)))
+    print("==========================================================")
+    print("Save dataset & validation set to path...")
+    print("==========================================================")
+    print()
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=False)
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv', header=False)
+
+    # Split dataset 80% - 20%
+    split_point = int(len(series) * 0.8)
+    dataset, validation = series[0:split_point], series[split_point:]
+    print()
+    print("==========================================================")
+    print("For 80% - 20% we have...")
+    print('Observations: %d' % (len(series)))
+    print('Dataset %d, Validation %d' % (len(dataset), len(validation)))
+    print("==========================================================")
+    print("Save dataset & validation set to path...")
+    print("==========================================================")
+    print()
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=False)
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv', header=False)
+
+    # Split dataset 90% - 10%
+    split_point = int(len(series) * 0.9)
+    dataset, validation = series[0:split_point], series[split_point:]
+    print()
+    print("==========================================================")
+    print("For 90% - 10% we have...")
+    print('Observations: %d' % (len(series)))
+    print('Dataset %d, Validation %d' % (len(dataset), len(validation)))
+    print("==========================================================")
+    print("Save dataset & validation set to path...")
+    print("==========================================================")
+    print()
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=False)
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=False)
+
+    # Split dataset 95% - 5%
+    split_point = int(len(series) * 0.95)
+    dataset, validation = series[0:split_point], series[split_point:]
+    print()
+    print("==========================================================")
+    print("For 95% - 5% we have...")
+    print('Observations: %d' % (len(series)))
+    print('Dataset %d, Validation %d' % (len(dataset), len(validation)))
+    print("==========================================================")
+    print("Save dataset & validation set to path...")
+    print("==========================================================")
+    print()
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=False)
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv', header=False)
+
+
+# Create line plots of the time series
+def create_line_plots(csv_file_name):
+    # load data for 70% - 30%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    series.plot()
+    pyplot.show()
+
+    # load data for 80% - 20%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    series.plot()
+    pyplot.show()
+
+    # load data for 90% - 10%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    series.plot()
+    pyplot.show()
+
+    # load data for 95% - 5%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    series.plot()
+    pyplot.show()
+
+
+def manual_arima(csv_file_name):
+    # load data for 70% - 30%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 70% - 30% we have...")
+    print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    p = input("Enter p value (Autoregression (AR) --> p): ")
+    d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
+    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    # prepare data
+    X = series.values
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    # walk-forward validation
+    history = [x for x in train]
+    predictions = list()
+    for i in range(len(test)):
+        # predict
+        warnings.filterwarnings("ignore")
+        model = ARIMA(history, order=(int(p), int(d), int(q)))
+        model_fit = model.fit()
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        # observation
+        obs = test[i]
+        history.append(obs)
+        print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
+    # report performance
+    rmse = sqrt(mean_squared_error(test, predictions))
+    print('RMSE: %.3f' % rmse)
+    print("==========================================================")
+    print()
+
+    # load data for 80% - 20%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 80% - 20% we have...")
+    print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    p = input("Enter p value (Autoregression (AR) --> p): ")
+    d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
+    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    # prepare data
+    X = series.values
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    # walk-forward validation
+    history = [x for x in train]
+    predictions = list()
+    for i in range(len(test)):
+        # predict
+        warnings.filterwarnings("ignore")
+        model = ARIMA(history, order=(int(p), int(d), int(q)))
+        model_fit = model.fit()
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        # observation
+        obs = test[i]
+        history.append(obs)
+        print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
+    # report performance
+    rmse = sqrt(mean_squared_error(test, predictions))
+    print('RMSE: %.3f' % rmse)
+    print("==========================================================")
+    print()
+
+    # load data for 90% - 10%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 90% - 10% we have...")
+    print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    p = input("Enter p value (Autoregression (AR) --> p): ")
+    d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
+    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    # prepare data
+    X = series.values
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    # walk-forward validation
+    history = [x for x in train]
+    predictions = list()
+    for i in range(len(test)):
+        # predict
+        warnings.filterwarnings("ignore")
+        model = ARIMA(history, order=(int(p), int(d), int(q)))
+        model_fit = model.fit()
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        # observation
+        obs = test[i]
+        history.append(obs)
+        print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
+    # report performance
+    rmse = sqrt(mean_squared_error(test, predictions))
+    print('RMSE: %.3f' % rmse)
+    print("==========================================================")
+    print()
+
+    # load data for 95% - 5%
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+                      index_col=0, parse_dates=True, squeeze=True)
+    print()
+    print("==========================================================")
+    print("For 95% - 5% we have...")
+    print("Enter (p, d, q) extracted by the conclusions made by stationarity and  ACF/PACF plots")
+    p = input("Enter p value (Autoregression (AR) --> p): ")
+    d = input("Enter d value (differencing --> d): ")
+    q = input("Enter q value (Moving Average (MA) --> q): ")
+    print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
+    # prepare data
+    X = series.values
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    # walk-forward validation
+    history = [x for x in train]
+    predictions = list()
+    for i in range(len(test)):
+        # predict
+        warnings.filterwarnings("ignore")
+        model = ARIMA(history, order=(int(p), int(d), int(q)))
+        model_fit = model.fit()
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        # observation
+        obs = test[i]
+        history.append(obs)
+        print('>Predicted=%.3f, Expected=%.3f' % (yhat, obs))
+    # report performance
+    rmse = sqrt(mean_squared_error(test, predictions))
+    print('RMSE: %.3f' % rmse)
+    print("==========================================================")
+    print()
+
+
 def save_fitted_model_arima(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
                       index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
@@ -35,14 +271,14 @@ def save_fitted_model_arima(csv_file_name):
     # bias = 1.081624
     # save model
     print("Saving model...")
-    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_70_30.pkl')
+    model_fit.save('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_70_30.pkl')
     # numpy.save('model_bias.npy', [bias])
     print("==========================================================")
     print()
 
     # ==================================================================================================================
     # load data for 80% - 20%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
                       index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
@@ -63,14 +299,14 @@ def save_fitted_model_arima(csv_file_name):
     # bias = 1.081624
     # save model
     print("Saving model...")
-    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_80_20.pkl')
+    model_fit.save('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_80_20.pkl')
     # numpy.save('model_bias.npy', [bias])
     print("==========================================================")
     print()
 
     # ==================================================================================================================
     # load data for 90% - 10%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
                       index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
@@ -91,14 +327,14 @@ def save_fitted_model_arima(csv_file_name):
     # bias = 1.081624
     # save model
     print("Saving model...")
-    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_90_10.pkl')
+    model_fit.save('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_90_10.pkl')
     # numpy.save('model_bias.npy', [bias])
     print("==========================================================")
     print()
 
     # ==================================================================================================================
     # load data for 95% - 5%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
                       index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
@@ -119,7 +355,7 @@ def save_fitted_model_arima(csv_file_name):
     # bias = 1.081624
     # save model
     print("Saving model...")
-    model_fit.save('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_95_5.pkl')
+    model_fit.save('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_95_5.pkl')
     # numpy.save('model_bias.npy', [bias])
     print("==========================================================")
     print()
@@ -188,11 +424,11 @@ def calculate_correlation_index(expected, predictions):
 
 def validate_arima_model(csv_file_name):
     # load data for 70% - 30%
-    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
                        index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv', header=None,
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv', header=None,
                           index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
@@ -205,7 +441,7 @@ def validate_arima_model(csv_file_name):
     print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
     # load model
     print("Loading model...")
-    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_70_30.pkl')
+    model_fit = ARIMAResults.load('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_70_30.pkl')
     # bias = numpy.load('model_bias.npy')
     # make first prediction
     print("Starting model evaluation...")
@@ -240,11 +476,11 @@ def validate_arima_model(csv_file_name):
 
     # ==================================================================================================================
     # load data for 80% - 20%
-    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
                        index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv', header=None,
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv', header=None,
                           index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
@@ -257,7 +493,7 @@ def validate_arima_model(csv_file_name):
     print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
     # load model
     print("Loading model...")
-    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_80_20.pkl')
+    model_fit = ARIMAResults.load('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_80_20.pkl')
     # bias = numpy.load('model_bias.npy')
     # make first prediction
     print("Starting model evaluation...")
@@ -292,11 +528,11 @@ def validate_arima_model(csv_file_name):
 
     # ==================================================================================================================
     # load data for 90% - 10%
-    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
                        index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=None,
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=None,
                           index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
@@ -309,7 +545,7 @@ def validate_arima_model(csv_file_name):
     print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
     # load model
     print("Loading model...")
-    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_90_10.pkl')
+    model_fit = ARIMAResults.load('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_90_10.pkl')
     # bias = numpy.load('model_bias.npy')
     # make first prediction
     print("Starting model evaluation...")
@@ -344,11 +580,11 @@ def validate_arima_model(csv_file_name):
 
     # ==================================================================================================================
     # load data for 95% - 5%
-    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
                        index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv', header=None,
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv', header=None,
                           index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
@@ -361,7 +597,7 @@ def validate_arima_model(csv_file_name):
     print('ARIMA(%d, %d, %d)' % (int(p), int(d), int(q)))
     # load model
     print("Loading model...")
-    model_fit = ARIMAResults.load('data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_95_5.pkl')
+    model_fit = ARIMAResults.load('../data/saved_models/' + csv_file_name.split('.csv')[0] + '_arima_95_5.pkl')
     # bias = numpy.load('model_bias.npy')
     # make first prediction
     print("Starting model evaluation...")
@@ -393,3 +629,38 @@ def validate_arima_model(csv_file_name):
     pyplot.plot(y)
     pyplot.plot(predictions, color='red')
     pyplot.show()
+
+
+# ======================================================================================================
+# Common steps
+# ======================================================================================================
+csv_file_name = "water.csv"
+print("Performing initial common steps for " + csv_file_name + " dataset...")
+print("==========================================================")
+print("First step split initial dataset to training & validation ones...")
+split_dataset(csv_file_name)
+input("Press Enter to continue...")
+
+print("Second step create line plots...")
+create_line_plots(csv_file_name)
+input("Press Enter to continue...")
+
+
+print("ARIMA model steps...")
+# ======================================================================================================
+# Modeling steps
+# ======================================================================================================
+print("Third step run manual ARIMA for specific (p, q, d) values...")
+manual_arima(csv_file_name)
+input("Press Enter to continue...")
+
+# ======================================================================================================
+# Validation steps
+# ======================================================================================================
+print("Fourth step save fitted model...")
+save_fitted_model_arima(csv_file_name)
+input("Press Enter to continue...")
+
+print("Fifth step validate fitted model...")
+validate_arima_model(csv_file_name)
+input("Press Enter to continue...")
