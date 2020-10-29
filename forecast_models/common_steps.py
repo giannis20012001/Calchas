@@ -24,8 +24,10 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=False)
-    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv', header=False)
+    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv',
+                      index_label='index', header=['values'])
 
     # Split dataset 80% - 20%
     split_point = int(len(series) * 0.8)
@@ -39,8 +41,10 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=False)
-    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv', header=False)
+    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv',
+                      index_label='index', header=['values'])
 
     # Split dataset 90% - 10%
     split_point = int(len(series) * 0.9)
@@ -54,8 +58,10 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=False)
-    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=False)
+    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv',
+                      index_label='index', header=['values'])
 
     # Split dataset 95% - 5%
     split_point = int(len(series) * 0.95)
@@ -69,15 +75,17 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=False)
-    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv', header=False)
+    dataset.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv',
+                      index_label='index', header=['values'])
 
 
 # evaluate a persistence model
 def create_persistence_model_from_dataset(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     # prepare data
     X = series.values
     X = X.astype('float32')
@@ -105,7 +113,7 @@ def create_persistence_model_from_dataset(csv_file_name):
 
     # load data for 80% - 20%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     # prepare data
     X = series.values
     X = X.astype('float32')
@@ -133,7 +141,7 @@ def create_persistence_model_from_dataset(csv_file_name):
 
     # load data for 90% - 10%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     # prepare data
     X = series.values
     X = X.astype('float32')
@@ -161,7 +169,7 @@ def create_persistence_model_from_dataset(csv_file_name):
 
     # load data for 95% - 5%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     # prepare data
     X = series.values
     X = X.astype('float32')
@@ -192,7 +200,7 @@ def create_persistence_model_from_dataset(csv_file_name):
 def summary_statistics(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 70% - 30% we have...")
@@ -202,7 +210,7 @@ def summary_statistics(csv_file_name):
 
     # load data for 80% - 20%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 80% - 20% we have...")
@@ -212,7 +220,7 @@ def summary_statistics(csv_file_name):
 
     # load data for 90% - 10%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
@@ -222,7 +230,7 @@ def summary_statistics(csv_file_name):
 
     # load data for 95% - 5%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
-                      header=None, index_col=0, parse_dates=True, squeeze=True)
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 95% - 5% we have...")
@@ -234,26 +242,26 @@ def summary_statistics(csv_file_name):
 # Create line plots of the time series
 def create_line_plots(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
     # load data for 80% - 20%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
     # load data for 90% - 10%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
     # load data for 95% - 5%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
@@ -261,8 +269,8 @@ def create_line_plots(csv_file_name):
 # Create density plots of the time series
 def create_density_plots(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure(1)
     pyplot.subplot(211)
     series.hist()
@@ -271,8 +279,8 @@ def create_density_plots(csv_file_name):
     pyplot.show()
 
     # load data for 80% - 20%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure(1)
     pyplot.subplot(211)
     series.hist()
@@ -281,8 +289,8 @@ def create_density_plots(csv_file_name):
     pyplot.show()
 
     # load data for 90% - 10%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure(1)
     pyplot.subplot(211)
     series.hist()
@@ -291,8 +299,8 @@ def create_density_plots(csv_file_name):
     pyplot.show()
 
     # load data for 95% - 5%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure(1)
     pyplot.subplot(211)
     series.hist()
@@ -304,8 +312,8 @@ def create_density_plots(csv_file_name):
 # Create boxplots plots of the time series
 def create_boxplots_plots(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     groups = series.groupby(Grouper(freq='A'))
     years = DataFrame()
     appended_data = []
@@ -319,8 +327,8 @@ def create_boxplots_plots(csv_file_name):
     pyplot.show()
 
     # load data for 80% - 20%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     groups = series.groupby(Grouper(freq='A'))
     years = DataFrame()
     appended_data = []
@@ -334,8 +342,8 @@ def create_boxplots_plots(csv_file_name):
     pyplot.show()
 
     # load data for 90% - 10%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     groups = series.groupby(Grouper(freq='A'))
     years = DataFrame()
     appended_data = []
@@ -349,8 +357,8 @@ def create_boxplots_plots(csv_file_name):
     pyplot.show()
 
     # load data for 95% - 5%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     groups = series.groupby(Grouper(freq='A'))
     years = DataFrame()
     appended_data = []
@@ -367,8 +375,8 @@ def create_boxplots_plots(csv_file_name):
 # statistical test for the stationarity of the time series
 def check_stationarity(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
 
     # check if stationary
     result = adfuller(series)
@@ -385,8 +393,8 @@ def check_stationarity(csv_file_name):
     print()
 
     # load data for 80% - 20%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
 
     # check if stationary
     result = adfuller(series)
@@ -403,8 +411,8 @@ def check_stationarity(csv_file_name):
     print()
 
     # load data for 90% - 10%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
 
     # check if stationary
     result = adfuller(series)
@@ -437,8 +445,8 @@ def check_stationarity(csv_file_name):
 
 def acf_pacf_plots(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
     plot_acf(series, ax=pyplot.gca())
@@ -447,8 +455,8 @@ def acf_pacf_plots(csv_file_name):
     pyplot.show()
 
     # load data for 80% - 20%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
     plot_acf(series, ax=pyplot.gca())
@@ -457,8 +465,8 @@ def acf_pacf_plots(csv_file_name):
     pyplot.show()
 
     # load data for 90% - 10%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
     plot_acf(series, ax=pyplot.gca())
@@ -467,8 +475,8 @@ def acf_pacf_plots(csv_file_name):
     pyplot.show()
 
     # load data for 95% - 5%
-    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     pyplot.figure()
     pyplot.subplot(211)
     plot_acf(series, ax=pyplot.gca())

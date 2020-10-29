@@ -1,15 +1,10 @@
 ###### Requirements without Version Specifiers ######`
-os
-gzip
-json
 scipy
 numpy
 keras
 pandas
-shutil
 pynput
-sklearn
-datetime
+scikit-learn
 requests
 tensorflow
 sqlalchemy

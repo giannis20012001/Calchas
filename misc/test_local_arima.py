@@ -26,8 +26,10 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=False)
-    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv', header=False)
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv',
+                      index_label='index', header=['values'])
 
     # Split dataset 80% - 20%
     split_point = int(len(series) * 0.8)
@@ -41,8 +43,10 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=False)
-    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv', header=False)
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv',
+                      index_label='index', header=['values'])
 
     # Split dataset 90% - 10%
     split_point = int(len(series) * 0.9)
@@ -56,8 +60,10 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=False)
-    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=False)
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv',
+                      index_label='index', header=['values'])
 
     # Split dataset 95% - 5%
     split_point = int(len(series) * 0.95)
@@ -71,41 +77,43 @@ def split_dataset(csv_file_name):
     print("Save dataset & validation set to path...")
     print("==========================================================")
     print()
-    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=False)
-    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv', header=False)
+    dataset.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                   index_label='index', header=['values'])
+    validation.to_csv(r'../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv',
+                      index_label='index', header=['values'])
 
 
 # Create line plots of the time series
 def create_line_plots(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
     # load data for 80% - 20%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
     # load data for 90% - 10%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
     # load data for 95% - 5%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     series.plot()
     pyplot.show()
 
 
 def manual_arima(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 70% - 30% we have...")
@@ -140,8 +148,8 @@ def manual_arima(csv_file_name):
     print()
 
     # load data for 80% - 20%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 80% - 20% we have...")
@@ -176,8 +184,8 @@ def manual_arima(csv_file_name):
     print()
 
     # load data for 90% - 10%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
@@ -212,8 +220,8 @@ def manual_arima(csv_file_name):
     print()
 
     # load data for 95% - 5%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 95% - 5% we have...")
@@ -250,8 +258,8 @@ def manual_arima(csv_file_name):
 
 def save_fitted_model_arima(csv_file_name):
     # load data for 70% - 30%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 70% - 30% we have...")
@@ -278,8 +286,8 @@ def save_fitted_model_arima(csv_file_name):
 
     # ==================================================================================================================
     # load data for 80% - 20%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 80% - 20% we have...")
@@ -306,8 +314,8 @@ def save_fitted_model_arima(csv_file_name):
 
     # ==================================================================================================================
     # load data for 90% - 10%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
@@ -334,8 +342,8 @@ def save_fitted_model_arima(csv_file_name):
 
     # ==================================================================================================================
     # load data for 95% - 5%
-    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                      index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                      header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 95% - 5% we have...")
@@ -424,12 +432,12 @@ def calculate_correlation_index(expected, predictions):
 
 def validate_arima_model(csv_file_name):
     # load data for 70% - 30%
-    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                       index_col=0, parse_dates=True, squeeze=True)
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                       header=0, index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv', header=None,
-                          index_col=0, parse_dates=True, squeeze=True)
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv',
+                          header=0, index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
     print("==========================================================")
@@ -476,12 +484,12 @@ def validate_arima_model(csv_file_name):
 
     # ==================================================================================================================
     # load data for 80% - 20%
-    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                       index_col=0, parse_dates=True, squeeze=True)
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                       header=0, index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv', header=None,
-                          index_col=0, parse_dates=True, squeeze=True)
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv',
+                          header=0, index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
     print("==========================================================")
@@ -528,12 +536,12 @@ def validate_arima_model(csv_file_name):
 
     # ==================================================================================================================
     # load data for 90% - 10%
-    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                       index_col=0, parse_dates=True, squeeze=True)
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                       header=0, index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=None,
-                          index_col=0, parse_dates=True, squeeze=True)
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv',
+                          header=0, index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
     print("==========================================================")
@@ -580,12 +588,12 @@ def validate_arima_model(csv_file_name):
 
     # ==================================================================================================================
     # load data for 95% - 5%
-    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv', header=None,
-                       index_col=0, parse_dates=True, squeeze=True)
+    dataset = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
+                       header=0, index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv', header=None,
-                          index_col=0, parse_dates=True, squeeze=True)
+    validation = read_csv('../data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_95_5.csv',
+                          header=0, index_col=0, parse_dates=True, squeeze=True)
     y = validation.values.astype('float32')
     print()
     print("==========================================================")
@@ -644,7 +652,6 @@ input("Press Enter to continue...")
 print("Second step create line plots...")
 create_line_plots(csv_file_name)
 input("Press Enter to continue...")
-
 
 print("ARIMA model steps...")
 # ======================================================================================================

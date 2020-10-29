@@ -14,14 +14,14 @@ import matplotlib.pyplot as plt
 from glob import glob
 from os import listdir
 from db_models import *
-from pandas import concat
 from numpy import nan, isnan
-from pandas import DataFrame
 from os.path import isfile, join
 from sqlalchemy import create_engine
+from pandas import concat, DataFrame
 from sklearn.impute import KNNImputer
 from sqlalchemy.orm import sessionmaker
 from forecast_models import common_steps
+from statsmodels.multivariate.pca import PCA
 from forecast_models.multilayer_perceptron_models import mlp_modeling
 from forecast_models.convolutional_neural_network_models import cnn_modeling
 from forecast_models.arima import arima_modeling_steps, arima_validation_steps
@@ -1037,7 +1037,7 @@ def series_to_supervised(data, n_in=1, n_out=1):
     return agg.values
 
 
-def fill_missing_values(ts):
+def fill_missing_values_knn(ts):
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
     # temp = ts.values.reshape(-1, 1)
     Xtrans = series_to_supervised(ts.values, n_in=3)
@@ -1051,6 +1051,23 @@ def fill_missing_values(ts):
     columns = len(X_filled_knn[0])
     # Get last column
     ts.iloc[:] = X_filled_knn[:, (columns - 1)]
+    # summarize total missing
+    print('Missing: %d' % sum(isnan(ts.values).flatten()))
+
+    return ts
+
+
+def fill_missing_values_pca(ts):
+    print('Missing: %d' % sum(isnan(ts.values).flatten()))
+    # temp = ts.values.reshape(-1, 1)
+    Xtrans = series_to_supervised(ts.values, n_in=3)
+    pc = PCA(data=Xtrans, ncomp=1, missing='fill-em')
+    X_filled_pca = pc._adjusted_data
+
+    # Find total column number for ndarray
+    columns = len(X_filled_pca[0])
+    # Get last column
+    ts.iloc[:] = X_filled_pca[:, (columns - 1)]
     # summarize total missing
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
 
@@ -1120,9 +1137,9 @@ def create_input_dataset_for_forecast_methods(table_name):
                 break
         # Series within the selected time range, with 0 replaced by NaN
         ts_wmv_day = ts_wmv_day.replace({0: nan})
-        ts_wmv_day = fill_missing_values(ts_wmv_day)
+        ts_wmv_day = fill_missing_values_pca(ts_wmv_day)
         print("Saving series to csv to be used by forecast methods...")
-        ts_wmv_day.to_csv(r'data/datasets/' + table_name + '_day.csv', header=None)
+        ts_wmv_day.to_csv(r'data/datasets/' + table_name + '_day.csv', index_label='index', header=['values'])
         print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
 
         return True
@@ -1170,9 +1187,9 @@ def create_input_dataset_for_forecast_methods(table_name):
                     break
             # Series within the selected time range, with 0 replaced by NaN
             ts_wmv_week = ts_wmv_week.replace({0: nan})
-            ts_wmv_week = fill_missing_values(ts_wmv_week)
+            ts_wmv_week = fill_missing_values_pca(ts_wmv_week)
             print("Saving series to csv to be used by forecast methods...")
-            ts_wmv_week.to_csv(r'data/datasets/' + table_name + '_week.csv', header=None)
+            ts_wmv_week.to_csv(r'data/datasets/' + table_name + '_week.csv', index_label='index', header=['values'])
             print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
 
             return True
@@ -1220,9 +1237,9 @@ def create_input_dataset_for_forecast_methods(table_name):
                     break
             # Series within the selected time range, with 0 replaced by NaN
             ts_wmv_month = ts_wmv_month.replace({0: nan})
-            ts_wmv_month = fill_missing_values(ts_wmv_month)
+            ts_wmv_month = fill_missing_values_pca(ts_wmv_month)
             print("Saving series to csv to be used by forecast methods...")
-            ts_wmv_month.to_csv(r'data/datasets/' + table_name + '_month.csv', header=None)
+            ts_wmv_month.to_csv(r'data/datasets/' + table_name + '_month.csv', index_label='index', header=['values'])
             print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
 
             return True
@@ -1449,7 +1466,6 @@ def main():
                                             "Enter 2 to fill data to main tables, perform values reduction & create "
                                             "final tables...\n"
                                             "Enter 3 to fill data to sub tables...\n"
-                                            "Enter 4 To create dataset input for forecast methods...\n"
                                             "Enter -1 to exit third step subroutine execution...\n"))
                     except ValueError:
                         print("You entered a wrong choice...\n\n")

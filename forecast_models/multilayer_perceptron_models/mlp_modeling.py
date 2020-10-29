@@ -129,10 +129,10 @@ def summarize_scores(scores):
 # repeat evaluation of a config
 def repeat_evaluate(csv_file_name, n_repeats=30):
     # load data for 70% - 30%
-    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv', header=None,
-                       index_col=0, parse_dates=True, squeeze=True)
-    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv', header=None,
-                          index_col=0, parse_dates=True, squeeze=True)
+    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
+                       header=0, index_col=0, parse_dates=True, squeeze=True)
+    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_70_30.csv',
+                          header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 70% - 30% we have...")
@@ -146,10 +146,10 @@ def repeat_evaluate(csv_file_name, n_repeats=30):
 
     # ==================================================================================================================
     # load data for 80% - 20%
-    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv', header=None,
-                       index_col=0, parse_dates=True, squeeze=True)
-    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv', header=None,
-                          index_col=0, parse_dates=True, squeeze=True)
+    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_80_20.csv',
+                       header=0, index_col=0, parse_dates=True, squeeze=True)
+    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_80_20.csv',
+                          header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 80% - 20% we have...")
@@ -164,12 +164,12 @@ def repeat_evaluate(csv_file_name, n_repeats=30):
 
     # ==================================================================================================================
     # load data for 90% - 10%
-    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv', header=None,
-                       index_col=0, parse_dates=True, squeeze=True)
+    dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_90_10.csv',
+                       header=0, index_col=0, parse_dates=True, squeeze=True)
     X = dataset.values.astype('float32')
     history = [x for x in X]
-    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv', header=None,
-                          index_col=0, parse_dates=True, squeeze=True)
+    validation = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_validation_90_10.csv',
+                          header=0, index_col=0, parse_dates=True, squeeze=True)
     print()
     print("==========================================================")
     print("For 90% - 10% we have...")
