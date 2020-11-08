@@ -25,7 +25,7 @@ def manual_arima(csv_file_name):
     # prepare data
     X = series.values
     X = X.astype('float32')
-    train_size = int(len(X) * 0.50)
+    train_size = int(len(X) * 0.5)
     train, test = X[0:train_size], X[train_size:]
     # walk-forward validation
     history = [x for x in train]
@@ -61,7 +61,7 @@ def manual_arima(csv_file_name):
     # prepare data
     X = series.values
     X = X.astype('float32')
-    train_size = int(len(X) * 0.50)
+    train_size = int(len(X) * 0.5)
     train, test = X[0:train_size], X[train_size:]
     # walk-forward validation
     history = [x for x in train]
@@ -97,7 +97,7 @@ def manual_arima(csv_file_name):
     # prepare data
     X = series.values
     X = X.astype('float32')
-    train_size = int(len(X) * 0.50)
+    train_size = int(len(X) * 0.5)
     train, test = X[0:train_size], X[train_size:]
     # walk-forward validation
     history = [x for x in train]
@@ -133,7 +133,7 @@ def manual_arima(csv_file_name):
     # prepare data
     X = series.values
     X = X.astype('float32')
-    train_size = int(len(X) * 0.50)
+    train_size = int(len(X) * 0.5)
     train, test = X[0:train_size], X[train_size:]
     # walk-forward validation
     history = [x for x in train]
