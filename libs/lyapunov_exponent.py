@@ -1,7 +1,5 @@
 import nolds
-import numpy as np
 from pandas import read_csv
-from matplotlib import pyplot
 
 # lm = nolds.logistic_map(0.1, 1000, r=4)
 # x = np.fromiter(lm, dtype="float32")
