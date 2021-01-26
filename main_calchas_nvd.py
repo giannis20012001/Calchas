@@ -1114,7 +1114,7 @@ def fill_missing_values_knn(ts):
     # temp = ts.values.reshape(-1, 1)
     Xtrans = series_to_supervised(ts.values, n_in=3)
     # Define imputer
-    imputer = KNNImputer(n_neighbors=3)
+    imputer = KNNImputer(n_neighbors=5)
     # Fit on the dataset
     imputer.fit(Xtrans)
     # Transform the dataset
