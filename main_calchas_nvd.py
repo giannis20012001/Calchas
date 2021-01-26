@@ -1193,15 +1193,16 @@ def create_input_dataset_for_forecast_methods(table_name):
     # Check for full time range
     eligible_range_for_day, missing_values_percentage_threshold, start_year, end_year = \
         check_missing_value_percentage(ts, missing_values)
+
     if eligible_range_for_day:
+        # TODO: Implement part to impute missing values & save to csv method
+        print("Day time_granularity was found eligible...")
         if missing_values_percentage_threshold == 20:
             print("Missing values percentage threshold used is 20%...")
         elif missing_values_percentage_threshold == 10:
             print("Missing values percentage threshold used is 10%...")
 
-    if eligible_range_for_day:
-        # TODO: Implement part to impute missing values & save to csv method
-        print("Day time_granularity was found eligible...")
+        print("Creating time series with imputed missing values...")
         for year in years_list:
             if year < start_year:
                 ts_wmv_day = ts_wmv_day.drop(ts_wmv_day.index[ts_wmv_day.index.year.isin([int(year)])])
@@ -1209,7 +1210,8 @@ def create_input_dataset_for_forecast_methods(table_name):
                 break
         # Series within the selected time range, with 0 replaced by NaN
         ts_wmv_day = ts_wmv_day.replace({0: nan})
-        ts_wmv_day = fill_missing_values_pca(ts_wmv_day)
+        # ts_wmv_day = fill_missing_values_pca(ts_wmv_day)
+        ts_wmv_day = fill_missing_values_knn(ts_wmv_day)
         print("Saving series to csv to be used by forecast methods...")
         ts_wmv_day.to_csv(r'data/datasets/' + table_name + '_day.csv', index_label='index', header=['values'])
         print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
@@ -1243,14 +1245,14 @@ def create_input_dataset_for_forecast_methods(table_name):
         # Check for full time range
         eligible_range_for_week, missing_values_percentage_threshold, start_year, end_year = \
             check_missing_value_percentage(ts, missing_values)
+
         if eligible_range_for_week:
+            print("Week time_granularity was found eligible...")
             if missing_values_percentage_threshold == 20:
                 print("Missing values percentage threshold used is 20%...")
             elif missing_values_percentage_threshold == 10:
                 print("Missing values percentage threshold used is 10%...")
 
-        if eligible_range_for_week:
-            print("Week time_granularity was found eligible...")
             print("Creating time series with imputed missing values...")
             for year in years_list:
                 if year < start_year:
@@ -1259,7 +1261,8 @@ def create_input_dataset_for_forecast_methods(table_name):
                     break
             # Series within the selected time range, with 0 replaced by NaN
             ts_wmv_week = ts_wmv_week.replace({0: nan})
-            ts_wmv_week = fill_missing_values_pca(ts_wmv_week)
+            # ts_wmv_week = fill_missing_values_pca(ts_wmv_week)
+            ts_wmv_week = fill_missing_values_knn(ts_wmv_week)
             print("Saving series to csv to be used by forecast methods...")
             ts_wmv_week.to_csv(r'data/datasets/' + table_name + '_week.csv', index_label='index', header=['values'])
             print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
@@ -1293,14 +1296,14 @@ def create_input_dataset_for_forecast_methods(table_name):
         # Check for full time range
         eligible_range_for_month, missing_values_percentage_threshold, start_year, end_year = \
             check_missing_value_percentage(ts, missing_values)
+
         if eligible_range_for_month:
+            print("Month time_granularity was found eligible...")
             if missing_values_percentage_threshold == 20:
                 print("Missing values percentage threshold used is 20%...")
             elif missing_values_percentage_threshold == 10:
                 print("Missing values percentage threshold used is 10%...")
 
-        if eligible_range_for_month:
-            print("Month time_granularity was found eligible...")
             print("Creating time series with imputed missing values...")
             for year in years_list:
                 if year < start_year:
@@ -1309,7 +1312,8 @@ def create_input_dataset_for_forecast_methods(table_name):
                     break
             # Series within the selected time range, with 0 replaced by NaN
             ts_wmv_month = ts_wmv_month.replace({0: nan})
-            ts_wmv_month = fill_missing_values_pca(ts_wmv_month)
+            # ts_wmv_month = fill_missing_values_pca(ts_wmv_month)
+            ts_wmv_month = fill_missing_values_knn(ts_wmv_month)
             print("Saving series to csv to be used by forecast methods...")
             ts_wmv_month.to_csv(r'data/datasets/' + table_name + '_month.csv', index_label='index', header=['values'])
             print("Input dataset creation for " + table_name + " has finished successfully...\n\n")
