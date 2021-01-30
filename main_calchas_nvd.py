@@ -788,13 +788,13 @@ def create_final_tables():
     connection = engine.connect()
     connection.execute(query)
     # remove duplicate rows for the same dates
-    query = "DELETE FROM microsoft_application_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM microsoft_application_server_final " \
-            "GROUP BY published_datetime, score);"
-    connection = engine.connect()
-    connection.execute(query)
+    # query = "DELETE FROM microsoft_application_server_final " \
+    #         "WHERE cve_id NOT IN " \
+    #         "(SELECT MAX(cve_id) " \
+    #         "FROM microsoft_application_server_final " \
+    #         "GROUP BY published_datetime, score);"
+    # connection = engine.connect()
+    # connection.execute(query)
     # ==================================================================================================================
     # microsoft_database_server_final
     query = "INSERT INTO microsoft_database_server_final(cve_id, published_datetime, score, " \
@@ -807,14 +807,6 @@ def create_final_tables():
             "GROUP BY published_datetime) AS groupedtt " \
             "ON  tt.score = groupedtt.MaxScore " \
             "AND tt.published_datetime = groupedtt.published_datetime;"
-    connection = engine.connect()
-    connection.execute(query)
-    # remove duplicate rows for the same dates
-    query = "DELETE FROM microsoft_database_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM microsoft_database_server_final " \
-            "GROUP BY published_datetime, score);"
     connection = engine.connect()
     connection.execute(query)
     # ==================================================================================================================
@@ -830,14 +822,6 @@ def create_final_tables():
             "ON  tt.score = groupedtt.MaxScore " \
             "AND tt.published_datetime = groupedtt.published_datetime;"
     connection.execute(query)
-    # remove duplicate rows for the same dates
-    query = "DELETE FROM microsoft_mail_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM microsoft_mail_server_final " \
-            "GROUP BY published_datetime, score);"
-    connection = engine.connect()
-    connection.execute(query)
     # ==================================================================================================================
     # openstack_compute_server_final
     query = "INSERT INTO openstack_compute_server_final(cve_id, published_datetime, score, " \
@@ -850,14 +834,6 @@ def create_final_tables():
             "GROUP BY published_datetime) AS groupedtt " \
             "ON  tt.score = groupedtt.MaxScore " \
             "AND tt.published_datetime = groupedtt.published_datetime;"
-    connection = engine.connect()
-    connection.execute(query)
-    # remove duplicate rows for the same dates
-    query = "DELETE FROM openstack_compute_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM openstack_compute_server_final " \
-            "GROUP BY published_datetime, score);"
     connection = engine.connect()
     connection.execute(query)
     # ==================================================================================================================
@@ -874,14 +850,6 @@ def create_final_tables():
             "AND tt.published_datetime = groupedtt.published_datetime;"
     connection = engine.connect()
     connection.execute(query)
-    # remove duplicate rows for the same dates
-    query = "DELETE FROM openstack_controller_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM openstack_controller_server_final " \
-            "GROUP BY published_datetime, score);"
-    connection = engine.connect()
-    connection.execute(query)
     # ==================================================================================================================
     # ubuntu_application_server_final
     query = "INSERT INTO ubuntu_application_server_final(cve_id, published_datetime, score, " \
@@ -894,14 +862,6 @@ def create_final_tables():
             "GROUP BY published_datetime) AS groupedtt " \
             "ON  tt.score = groupedtt.MaxScore " \
             "AND tt.published_datetime = groupedtt.published_datetime;"
-    connection = engine.connect()
-    connection.execute(query)
-    # remove duplicate rows for the same dates
-    query = "DELETE FROM ubuntu_application_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM ubuntu_application_server_final " \
-            "GROUP BY published_datetime, score);"
     connection = engine.connect()
     connection.execute(query)
     # ==================================================================================================================
@@ -918,14 +878,6 @@ def create_final_tables():
             "AND tt.published_datetime = groupedtt.published_datetime;"
     connection = engine.connect()
     connection.execute(query)
-    # remove duplicate rows for the same dates
-    query = "DELETE FROM ubuntu_database_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM ubuntu_database_server_final " \
-            "GROUP BY published_datetime, score);"
-    connection = engine.connect()
-    connection.execute(query)
     # ==================================================================================================================
     # ubuntu_mail_server_final
     query = "INSERT INTO ubuntu_mail_server_final(cve_id, published_datetime, score, " \
@@ -938,14 +890,6 @@ def create_final_tables():
             "GROUP BY published_datetime) AS groupedtt " \
             "ON  tt.score = groupedtt.MaxScore " \
             "AND tt.published_datetime = groupedtt.published_datetime;"
-    connection = engine.connect()
-    connection.execute(query)
-    # remove duplicate rows for the same dates
-    query = "DELETE FROM ubuntu_mail_server_final " \
-            "WHERE cve_id NOT IN " \
-            "(SELECT MAX(cve_id) " \
-            "FROM ubuntu_mail_server_final " \
-            "GROUP BY published_datetime, score);"
     connection = engine.connect()
     connection.execute(query)
     # ==================================================================================================================
