@@ -1,4 +1,5 @@
 import nolds
+import numpy as np
 from pandas import read_csv
 
 # lm = nolds.logistic_map(0.1, 1000, r=4)
@@ -8,9 +9,16 @@ from pandas import read_csv
 # print(l)
 # print(k)
 
+lm = nolds.logistic_map(0.1, 1000, r=4)
+X = np.fromiter(lm, dtype="float32")
+# l = max(nolds.lyap_e(X))
+l = nolds.lyap_r(X, emb_dim=5, lag=1, min_tsep=None, min_neighbors=3, trajectory_len=7)
+
 # load dataset
-series = read_csv('../data/datasets/ubuntu_application_server_final_week.csv',
-                  header=0, index_col=0, parse_dates=True, squeeze=True)
+# series = read_csv('../data/datasets/ubuntu_application_server_final_week.csv',
+#                   header=0, index_col=0, parse_dates=True, squeeze=True)
+series = read_csv('../data/datasets/test_datasets/henon_dif.csv',
+                  header=None, parse_dates=True, squeeze=True)
 x = series.values
 x = x.astype('float32')
 # x = np.fromiter(series.values, dtype="float32")
@@ -22,7 +30,12 @@ x = x.astype('float32')
 # print("Eckmann: " + str(e))
 # r = nolds.lyap_r(x, emb_dim=emb_dim_ext, lag=None, min_tsep=None, min_neighbors=3, trajectory_len=3)
 
-r = nolds.lyap_r(x, emb_dim=4, lag=1, min_tsep=None, min_neighbors=3, trajectory_len=7)
+# emb_dim from 3, 5 ,7
+# lag form 1, 2, 3, 4
+# min_neighbors form 2, 3, 4, 5
+# trajectory_len from 6, 7, 8
+
+r = nolds.lyap_r(x, emb_dim=5, lag=3, min_tsep=None, min_neighbors=3, trajectory_len=20)
 print("result: " + str(r))
 
 # print("1 Calculate LLE using Rosenstein algorithm with "
