@@ -1,7 +1,7 @@
 import nolds
 from pandas import read_csv
 from openpyxl import load_workbook
-from openpyxl.styles import PatternFill, colors
+from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import CellIsRule
 
 # lm = nolds.logistic_map(0.1, 1000, r=4)
@@ -42,10 +42,10 @@ for sheet in worksheets:
     rows = list(range(3, 7)) + list(range(11, 15)) + list(range(19, 23))
     columns = list(range(2, 14))
 
-    emb_dim = [3, 5, 7]
-    lag = [1, 2, 3, 4]
-    min_neighbors = [2, 3, 4, 5]
-    trajectory_len = [6, 7, 8]
+    emb_dim = -1
+    lag = -1
+    min_neighbors = -1
+    trajectory_len = -1
 
     for row in rows:
         if row == 3:
