@@ -1,16 +1,17 @@
 ###### Requirements without Version Specifiers ######`
-nolds~=0.5.2
-scipy~=1.4.1
-numpy~=1.18.5
-keras~=2.4.3
-pandas~=1.2.1
+nolds
+scipy
+numpy
+keras
+pandas
 pynput
-scikit-learn~=0.24.1
-requests~=2.25.1
-sqlalchemy~=1.3.22
-matplotlib~=3.3.4
-statsmodels~=0.12.1
-openpyxl~=3.0.6
-sklearn~=0.0
-impyute~=0.0.8
+scikit-learn
+requests
+sqlalchemy
+matplotlib
+statsmodels
+openpyxl
+sklearn
+impyute
+p_tqdm
 tensorflow-gpu==2.3.0 # For CUDA 10.1 compatibility
