@@ -1,5 +1,7 @@
 ###### Requirements without Version Specifiers ######`
 nolds
+joblib
+tqdm
 scipy
 numpy
 keras
@@ -13,5 +15,4 @@ statsmodels
 openpyxl
 sklearn
 impyute
-p_tqdm
 tensorflow-gpu==2.3.0 # For CUDA 10.1 compatibility

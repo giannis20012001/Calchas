@@ -927,7 +927,7 @@ def calculate_missing_values_dataframe(ts_wmv, years_list, table_name, time_gran
         count = 0
         for index_val, series_val in ts_wmv.iteritems():
             if (int(missing_values_df['Start_Year_Range'][i]) <= index_val.year <=
-                int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
+                    int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
                 count = count + 1
         missing_values_df.iloc[i, missing_values_df.columns.get_loc('Non_Zero_values')] = count
 
@@ -1216,7 +1216,7 @@ def create_input_dataset_for_forecast_methods(table_name):
     # ==================================================================================================================
     # Third check for month
     # ==================================================================================================================
-    if eligible_range_for_week:
+    if not eligible_range_for_week:
         print("Week time_granularity was not eligible. Switching to month...")
         # create series from dataframe
         ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
