@@ -22,6 +22,7 @@ from sklearn.impute import KNNImputer
 # Functions space
 # ======================================================================================================================
 # transform list into supervised learning format
+# noinspection Duplicates
 def series_to_supervised(data, n_in=1, n_out=1):
     df = DataFrame(data)
     cols = list()
@@ -104,23 +105,25 @@ def get_fft_ratio(ts):
     return result
 
 
+# noinspection Duplicates
 def fill_missing_values_knn(ts):
     # temp = ts.values.reshape(-1, 1)
-    Xtrans = series_to_supervised(ts.values, n_in=3)
+    xtrans = series_to_supervised(ts.values, n_in=3)
     # Define imputer
     imputer = KNNImputer(n_neighbors=5)
     # Fit on the dataset
-    imputer.fit(Xtrans)
+    imputer.fit(xtrans)
     # Transform the dataset
-    X_filled_knn = imputer.transform(Xtrans)
+    x_filled_knn = imputer.transform(xtrans)
     # Find total column number for ndarray
-    columns = len(X_filled_knn[0])
+    columns = len(x_filled_knn[0])
     # Get last column
-    ts.iloc[:] = X_filled_knn[:, (columns - 1)]
+    ts.iloc[:] = x_filled_knn[:, (columns - 1)]
 
     return ts
 
 
+# noinspection Duplicates
 def check_missing_value_percentage(ts, missing_values):
     result = get_fft_ratio(ts)
     missing_values_percentage_threshold = 0
@@ -142,6 +145,7 @@ def check_missing_value_percentage(ts, missing_values):
     return mv_flag, missing_values_percentage_threshold, start_year, end_year
 
 
+# noinspection Duplicates
 def calculate_missing_values_dataframe(ts_wmv, years_list, random_system_name, time_granularity_val):
     missing_values_df = DataFrame(index=range(len(years_list)), columns=['System_Examined',
                                                                          'Start_Year_Range',
@@ -184,6 +188,7 @@ def calculate_missing_values_dataframe(ts_wmv, years_list, random_system_name, t
     return missing_values_df
 
 
+# noinspection Duplicates
 def check_eligible_range_for_day(initial_df, random_system_name, glooss):
     # create series from dataframe
     ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
@@ -216,6 +221,7 @@ def check_eligible_range_for_day(initial_df, random_system_name, glooss):
     return False, None
 
 
+# noinspection Duplicates
 def check_eligible_range_for_week(initial_df, random_system_name, glooss):
     # create series from dataframe
     ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
@@ -249,6 +255,7 @@ def check_eligible_range_for_week(initial_df, random_system_name, glooss):
     return False, None
 
 
+# noinspection Duplicates
 def check_eligible_range_for_month(initial_df, random_system_name, glooss):
     # create series from dataframe
     ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])

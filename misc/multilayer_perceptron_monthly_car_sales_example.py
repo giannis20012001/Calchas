@@ -13,11 +13,13 @@ from matplotlib import pyplot
 
 
 # split a univariate dataset into train/test sets
+# noinspection PyShadowingNames
 def train_test_split(data, n_test):
 	return data[:-n_test], data[-n_test:]
 
 
 # transform list into supervised learning format
+# noinspection PyShadowingNames
 def series_to_supervised(data, n_in=1, n_out=1):
 	df = DataFrame(data)
 	cols = list()
@@ -40,6 +42,7 @@ def measure_rmse(actual, predicted):
 
 
 # fit a model
+# noinspection PyShadowingNames
 def model_fit(train, config):
 	# unpack config
 	n_input, n_nodes, n_epochs, n_batch = config
@@ -57,6 +60,7 @@ def model_fit(train, config):
 
 
 # forecast with a pre-fit model
+# noinspection PyShadowingNames
 def model_predict(model, history, config):
 	# unpack config
 	n_input, _, _, _ = config
@@ -68,6 +72,7 @@ def model_predict(model, history, config):
 
 
 # walk-forward validation for univariate data
+# noinspection PyShadowingNames
 def walk_forward_validation(data, n_test, cfg):
 	predictions = list()
 	# split dataset
@@ -91,6 +96,7 @@ def walk_forward_validation(data, n_test, cfg):
 
 
 # repeat evaluation of a config
+# noinspection PyShadowingNames
 def repeat_evaluate(data, config, n_test, n_repeats=30):
 	# fit and evaluate the model n times
 	scores = [walk_forward_validation(data, n_test, config) for _ in range(n_repeats)]
@@ -98,6 +104,7 @@ def repeat_evaluate(data, config, n_test, n_repeats=30):
 
 
 # summarize model performance
+# noinspection PyShadowingNames,PyStringFormat
 def summarize_scores(name, scores):
 	# print a summary
 	scores_m, score_std = mean(scores), std(scores)

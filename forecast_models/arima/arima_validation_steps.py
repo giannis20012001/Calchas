@@ -12,6 +12,7 @@ from sklearn.metrics import mean_absolute_error
 from statsmodels.tsa.arima_model import ARIMAResults
 
 
+# noinspection DuplicatedCode,PyPep8Naming
 def save_fitted_model_arima(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
@@ -125,6 +126,7 @@ def save_fitted_model_arima(csv_file_name):
     print()
 
 
+# noinspection DuplicatedCode
 def calculate_forecasting_performance_measures(expected, predictions):
     y_true = np.array(expected)
     y_pred = np.array(predictions)
@@ -186,6 +188,7 @@ def calculate_correlation_index(expected, predictions):
     print()
 
 
+# noinspection DuplicatedCode,PyUnresolvedReferences,PyPep8Naming
 def validate_arima_model(csv_file_name):
     # load data for 70% - 30%
     dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',

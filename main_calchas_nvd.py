@@ -80,6 +80,7 @@ def decoded_json_data_from_file(cve_items_dict):
     print("Done reading json file")
 
 
+# noinspection PyPep8Naming
 def sqlalchemy_engine_start():
     engine = create_engine("sqlite:////home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db",
                            echo=True)
@@ -898,6 +899,7 @@ def create_final_tables():
     print("Value reduction & data entry to final tables has finished...\n\n")
 
 
+# noinspection Duplicates
 def calculate_missing_values_dataframe(ts_wmv, years_list, table_name, time_granularity_val):
     missing_values_df = DataFrame(index=range(len(years_list)), columns=['System_Examined',
                                                                          'Start_Year_Range',
@@ -1016,6 +1018,7 @@ def get_fft_ratio(ts):
     return result
 
 
+# noinspection Duplicates
 def check_missing_value_percentage(ts, missing_values):
     result = get_fft_ratio(ts)
     missing_values_percentage_threshold = 0
@@ -1038,6 +1041,7 @@ def check_missing_value_percentage(ts, missing_values):
 
 
 # transform list into supervised learning format
+# noinspection Duplicates
 def series_to_supervised(data, n_in=1, n_out=1):
     df = DataFrame(data)
     cols = list()
@@ -1056,34 +1060,35 @@ def series_to_supervised(data, n_in=1, n_out=1):
 def fill_missing_values_knn(ts):
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
     # temp = ts.values.reshape(-1, 1)
-    Xtrans = series_to_supervised(ts.values, n_in=3)
+    xtrans = series_to_supervised(ts.values, n_in=3)
     # Define imputer
     imputer = KNNImputer(n_neighbors=5)
     # Fit on the dataset
-    imputer.fit(Xtrans)
+    imputer.fit(xtrans)
     # Transform the dataset
-    X_filled_knn = imputer.transform(Xtrans)
+    x_filled_knn = imputer.transform(xtrans)
     # Find total column number for ndarray
-    columns = len(X_filled_knn[0])
+    columns = len(x_filled_knn[0])
     # Get last column
-    ts.iloc[:] = X_filled_knn[:, (columns - 1)]
+    ts.iloc[:] = x_filled_knn[:, (columns - 1)]
     # summarize total missing
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
 
     return ts
 
 
+# noinspection PyProtectedMember
 def fill_missing_values_pca(ts):
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
     # temp = ts.values.reshape(-1, 1)
-    Xtrans = series_to_supervised(ts.values, n_in=3)
-    pc = PCA(data=Xtrans, ncomp=1, missing='fill-em')
-    X_filled_pca = pc._adjusted_data
+    xtrans = series_to_supervised(ts.values, n_in=3)
+    pc = PCA(data=xtrans, ncomp=1, missing='fill-em')
+    x_filled_pca = pc._adjusted_data
 
     # Find total column number for ndarray
-    columns = len(X_filled_pca[0])
+    columns = len(x_filled_pca[0])
     # Get last column
-    ts.iloc[:] = X_filled_pca[:, (columns - 1)]
+    ts.iloc[:] = x_filled_pca[:, (columns - 1)]
     # summarize total missing
     print('Missing: %d' % sum(isnan(ts.values).flatten()))
 

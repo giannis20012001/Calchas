@@ -6,7 +6,8 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 
 # load dataset
-series = read_csv('../../data/datasets/daily-minimum-temperatures.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
+series = read_csv('../../data/datasets/daily-minimum-temperatures.csv', header=0, index_col=0, parse_dates=True,
+                  squeeze=True)
 
 # split dataset
 X = series.values

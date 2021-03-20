@@ -121,6 +121,7 @@ def walk_forward_validation(train, test, cfg):
 
 
 # summarize model performance
+# noinspection PyStringFormat
 def summarize_scores(scores):
     # print a summary
     scores_m, score_std = np.mean(scores), np.std(scores)
@@ -134,6 +135,7 @@ def summarize_scores(scores):
 
 
 # repeat evaluation of a config
+# noinspection PyPep8Naming
 def repeat_evaluate(csv_file_name, n_repeats=30):
     # load data for 70% - 30%
     dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',

@@ -10,6 +10,7 @@ from sklearn.metrics import mean_absolute_error
 
 
 # transform list into supervised learning format
+# noinspection DuplicatedCode
 def series_to_supervised(data, n_in=1, n_out=1):
     df = DataFrame(data)
     cols = list()
@@ -62,6 +63,7 @@ def model_predict(model, history, config):
     return yhat[0]
 
 
+# noinspection DuplicatedCode
 def calculate_forecasting_performance_measures(expected, predictions):
     y_true = np.array(expected)
     y_pred = np.array(predictions)
@@ -114,6 +116,7 @@ def walk_forward_validation(train, test, cfg):
 
 
 # summarize model performance
+# noinspection PyStringFormat
 def summarize_scores(scores):
     # print a summary
     scores_m, score_std = np.mean(scores), np.std(scores)
@@ -127,6 +130,7 @@ def summarize_scores(scores):
 
 
 # repeat evaluation of a config
+# noinspection DuplicatedCode,PyPep8Naming
 def repeat_evaluate(csv_file_name, n_repeats=30):
     # load data for 70% - 30%
     dataset = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',

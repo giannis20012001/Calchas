@@ -10,6 +10,7 @@ from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.graphics.tsaplots import plot_pacf
 
 
+# noinspection Duplicates,PyPep8Naming,PyUnresolvedReferences,PyTypeChecker,PyBroadException
 def manual_arima(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
@@ -157,6 +158,7 @@ def manual_arima(csv_file_name):
 
 
 # evaluate an ARIMA model for a given order (p,d,q) and return RMSE
+# noinspection PyPep8Naming,PyUnresolvedReferences
 def evaluate_arima_model(X, arima_order):
     # prepare training dataset
     X = X.astype('float32')
@@ -178,6 +180,7 @@ def evaluate_arima_model(X, arima_order):
 
 
 # evaluate combinations of p, d and q values for an ARIMA model
+# noinspection PyBroadException
 def evaluate_models(dataset, p_values, d_values, q_values):
     dataset = dataset.astype('float32')
     best_score, best_cfg = float("inf"), None
@@ -195,6 +198,7 @@ def evaluate_models(dataset, p_values, d_values, q_values):
     print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
 
 
+# noinspection DuplicatedCode
 def grid_search_arima(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
@@ -257,6 +261,7 @@ def grid_search_arima(csv_file_name):
     print()
 
 
+# noinspection DuplicatedCode,PyUnresolvedReferences
 def residual_errors_plot_arima(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
@@ -427,6 +432,7 @@ def residual_errors_plot_arima(csv_file_name):
     pyplot.show()
 
 
+# noinspection DuplicatedCode,PyPep8Naming,PyUnresolvedReferences
 def residual_acf_errors_plot_arima(csv_file_name):
     # load data for 70% - 30%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_70_30.csv',
@@ -551,7 +557,7 @@ def residual_acf_errors_plot_arima(csv_file_name):
     plot_pacf(residuals, ax=pyplot.gca())
     pyplot.show()
 
-# load data for 95% - 5%
+    # load data for 95% - 5%
     series = read_csv('data/datasets/' + csv_file_name.split('.csv')[0] + '_dataset_95_5.csv',
                       header=0, index_col=0, parse_dates=True, squeeze=True)
     print()

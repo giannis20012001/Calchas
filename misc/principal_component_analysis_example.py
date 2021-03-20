@@ -30,5 +30,6 @@ test_2 = impy.moving_window(A, wsize=5)
 
 
 pc = PCA(data=A, ncomp=1, missing='fill-em')
+# noinspection PyProtectedMember
 B = pc._adjusted_data
 print(B)
