@@ -1,3 +1,5 @@
+import time
+import random
 import sqlite3
 import numpy as np
 import pandas as pd
@@ -5,17 +7,10 @@ from tqdm import tqdm
 import multiprocessing
 # from p_tqdm import p_map
 from numpy import nan
-from random import sample
+from datetime import datetime
 from pandas import concat, DataFrame
 from joblib import Parallel, delayed
 from sklearn.impute import KNNImputer
-
-# ======================================================================================================================
-# Global variables
-# ======================================================================================================================
-# glooss = np.empty(500, pd.Series)  # global list of open source systems
-# glocss = np.empty(500)  # global list of closed source systems
-# verts = [None]*500
 
 
 # ======================================================================================================================
@@ -189,7 +184,7 @@ def calculate_missing_values_dataframe(ts_wmv, years_list, random_system_name, t
 
 
 # noinspection Duplicates
-def check_eligible_range_for_day(initial_df, random_system_name, glooss):
+def check_eligible_range_for_day(initial_df, random_system_name):
     # create series from dataframe
     ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
     ts.index = pd.DatetimeIndex(ts.index)
@@ -214,15 +209,14 @@ def check_eligible_range_for_day(initial_df, random_system_name, glooss):
         ts_wmv_day = ts_wmv_day.replace({0: nan})
         # ts_wmv_day = fill_missing_values_pca(ts_wmv_day)
         ts_wmv_day = fill_missing_values_knn(ts_wmv_day)
-        glooss.append(ts_wmv_day)
 
-        return True
+        return True, ts_wmv_day
 
     return False, None
 
 
 # noinspection Duplicates
-def check_eligible_range_for_week(initial_df, random_system_name, glooss):
+def check_eligible_range_for_week(initial_df, random_system_name):
     # create series from dataframe
     ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
     ts.index = pd.DatetimeIndex(ts.index)
@@ -248,15 +242,14 @@ def check_eligible_range_for_week(initial_df, random_system_name, glooss):
         ts_wmv_week = ts_wmv_week.replace({0: nan})
         # ts_wmv_week = fill_missing_values_pca(ts_wmv_week)
         ts_wmv_week = fill_missing_values_knn(ts_wmv_week)
-        glooss.append(ts_wmv_week)
 
-        return True
+        return True, ts_wmv_week
 
     return False, None
 
 
 # noinspection Duplicates
-def check_eligible_range_for_month(initial_df, random_system_name, glooss):
+def check_eligible_range_for_month(initial_df, random_system_name):
     # create series from dataframe
     ts = pd.Series(initial_df['score'].values, index=initial_df['published_datetime'])
     ts.index = pd.DatetimeIndex(ts.index)
@@ -282,22 +275,19 @@ def check_eligible_range_for_month(initial_df, random_system_name, glooss):
         ts_wmv_month = ts_wmv_month.replace({0: nan})
         # ts_wmv_month = fill_missing_values_pca(ts_wmv_month)
         ts_wmv_month = fill_missing_values_knn(ts_wmv_month)
-        glooss.append(ts_wmv_month)
 
-        return True
+        return True, ts_wmv_month
 
     return False, None
 
 
-def create_random_systems_dataset(idx, glooss, day, week, month):
-    print("Start creation of random systems...")
+def create_random_cs_system_dataset(idx, seed):
+    print("Start creation of random closed source system " + str(idx) + "...")
 
-    # Create a SQL connection to SQLite database that holds final tables
-    con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
+    # Create a SQL connection to SQLite database
+    con = sqlite3.connect('C:\\Users\\lumi\\Dropbox\\unipi\\paper_NVD_forcasting\\sqlight_db\\nvd_nist.db')
     # prepare the lists of sequences
     closed_source_os_sequence = ['%microsoft%windows%']
-    open_source_os_sequence = ['%ubuntu%', '%debian%', '%redhat%', '%centos%', '%fedora%']
-    open_source_permanent_services_sequence = ['%linux_kernel:%']
     volatile_services_sequence = ['%iptables%', '%ntp%', '%fail2ban%', '%mysql%', '%mongodb%', '%postgres%',
                                   '%apache2%', '%rabbitmq%', '%activemq%', '%kafka%', '%jboss%', '%memcached%',
                                   '%redis%', '%gitlab%', '%elastic:%', '%haproxy%', '%traefik%', '%seesaw%',
@@ -311,7 +301,8 @@ def create_random_systems_dataset(idx, glooss, day, week, month):
     # for x in range(1, 501):
     print("Doing system " + str(idx))
     # Select a subset without replacement
-    subset_volatile_services_sequence = sample(volatile_services_sequence, 7)
+    random.seed(seed)
+    subset_volatile_services_sequence = random.sample(volatile_services_sequence, 7)
     # Build the query string
     query = ("SELECT date(published_datetime) as published_datetime, score " +
              "FROM cve_items " +
@@ -336,21 +327,92 @@ def create_random_systems_dataset(idx, glooss, day, week, month):
         initial_df = initial_df.reset_index()
 
     # First check for day
-    if check_eligible_range_for_day(initial_df, ("random_system_" + str(idx)), glooss):
-        day.append(1)
-    # Second check for week
-    elif check_eligible_range_for_week(initial_df, ("random_system_" + str(idx)), glooss):
-        week.append(1)
-    # Third check for month
-    elif check_eligible_range_for_month(initial_df, ("random_system_" + str(idx)), glooss):
-        month.append(1)
+    status_true, pd_ts = check_eligible_range_for_day(initial_df, ("random_system_" + str(idx)))
+    if status_true:
+        return pd_ts
 
-    # Make random closed source system datasets
-    #
+    # If day fails then check for week
+    status_true, pd_ts = check_eligible_range_for_week(initial_df, ("random_system_" + str(idx)))
+    if status_true:
+        return pd_ts
+
+    # If week fails check for month
+    status_true, pd_ts = check_eligible_range_for_month(initial_df, ("random_system_" + str(idx)))
+    if status_true:
+        return pd_ts
+
     # Close connection when done
     con.close()
 
-    return False
+    return None
+
+
+def create_random_os_system_dataset(idx, seed):
+    print("Start creation of random closed source system " + str(idx) + "...")
+
+    # Create a SQL connection to SQLite database
+    con = sqlite3.connect('C:\\Users\\lumi\\Dropbox\\unipi\\paper_NVD_forcasting\\sqlight_db\\nvd_nist.db')
+    # prepare the lists of sequences
+    open_source_os_sequence = ['%ubuntu%', '%debian%', '%redhat%', '%centos%', '%fedora%']
+    open_source_permanent_services_sequence = ['%linux_kernel:%']
+    volatile_services_sequence = ['%iptables%', '%ntp%', '%fail2ban%', '%mysql%', '%mongodb%', '%postgres%',
+                                  '%apache2%', '%rabbitmq%', '%activemq%', '%kafka%', '%jboss%', '%memcached%',
+                                  '%redis%', '%gitlab%', '%elastic:%', '%haproxy%', '%traefik%', '%seesaw%',
+                                  '%neutrino%', '%squid%', '%clamav%', '%ufw%', '%ldap%', '%zimbra%', '%spamassassin%',
+                                  '%microsoft%active%directory%', '%.net%framework%', '%microsoft%iis%',
+                                  '%microsoft%sql%server%', '%microsoft%exchange%', '%spamassassin%', '%mcafee%',
+                                  '%kaspersky%', '%windows%defender%', '%avira%', '%bitdefender%', '%comodo%',
+                                  '%avast%', '%f%secure%', '%sophos%']
+
+    # Make random closed source system datasets
+    # for x in range(1, 501):
+    print("Doing system " + str(idx))
+    # Select a subset without replacement
+    random.seed(seed)
+    subset_open_source_os_sequence = random.sample(open_source_os_sequence, 1)
+    subset_volatile_services_sequence = random.sample(volatile_services_sequence, 6)
+    # Build the query string
+    query = ("SELECT date(published_datetime) as published_datetime, score " +
+             "FROM cve_items " +
+             "WHERE LOWER(vulnerable_software_list) LIKE '" + subset_open_source_os_sequence[0] + "' " +
+             "OR LOWER(vulnerable_software_list) LIKE '" + open_source_permanent_services_sequence[0] + "' " +
+             "OR LOWER(vulnerable_software_list) LIKE '" + subset_volatile_services_sequence[0] + "' " +
+             "OR LOWER(vulnerable_software_list) LIKE '" + subset_volatile_services_sequence[1] + "' " +
+             "OR LOWER(vulnerable_software_list) LIKE '" + subset_volatile_services_sequence[2] + "' " +
+             "OR LOWER(vulnerable_software_list) LIKE '" + subset_volatile_services_sequence[3] + "' " +
+             "OR LOWER(vulnerable_software_list) LIKE '" + subset_volatile_services_sequence[4] + "' " +
+             "OR LOWER(vulnerable_software_list) LIKE '" + subset_volatile_services_sequence[5] + "' " +
+             "ORDER BY published_datetime")
+    # Read sqlite query results into a pandas DataFrame
+    initial_df = pd.read_sql_query(query, con)
+    # Performing initial value reduction
+    initial_df = initial_df.loc[initial_df.groupby('published_datetime')['score'].idxmax()]
+    initial_df.published_datetime = pd.to_datetime(initial_df.published_datetime)
+    # Check if duplicate values exist in published_datetime column and keep the maximum value
+    if initial_df.published_datetime.duplicated().any():
+        # Remove duplicate values for the same date
+        initial_df = initial_df.groupby('published_datetime').max()
+        initial_df = initial_df.reset_index()
+
+    # First check for day
+    status_true, pd_ts = check_eligible_range_for_day(initial_df, ("random_system_" + str(idx)))
+    if status_true:
+        return pd_ts
+
+    # If day fails then check for week
+    status_true, pd_ts = check_eligible_range_for_week(initial_df, ("random_system_" + str(idx)))
+    if status_true:
+        return pd_ts
+
+    # If week fails check for month
+    status_true, pd_ts = check_eligible_range_for_month(initial_df, ("random_system_" + str(idx)))
+    if status_true:
+        return pd_ts
+
+    # Close connection when done
+    con.close()
+
+    return None
 
 
 # ======================================================================================================================
@@ -360,13 +422,22 @@ def main():
     print("Welcome to Calchas chaos generalization...")
 
     num_cores = multiprocessing.cpu_count()
-    mumanager = multiprocessing.Manager()
-    glooss = mumanager.list()
-    day = week = month = mumanager.list()
+    seed_table = [0] * 500
+    for x in range(len(seed_table)):
+        time.sleep(0.5)
+        seed_table[x] = datetime.now()
 
-    _ = Parallel(n_jobs=num_cores)(delayed(create_random_systems_dataset)(idx, glooss, day, week, month) for idx in tqdm(range(1, 10)))
+    cs_systems_list = Parallel(n_jobs=num_cores)(delayed(create_random_cs_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
 
-    print()
+    print(cs_systems_list)
+
+    seed_table = [0] * 500
+    for x in range(len(seed_table)):
+        time.sleep(0.5)
+        seed_table[x] = datetime.now()
+
+    os_systems_list = Parallel(n_jobs=num_cores)(delayed(create_random_os_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
+    print(os_systems_list)
 
 
 if __name__ == "__main__":

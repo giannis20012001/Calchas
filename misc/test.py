@@ -1,16 +1,5 @@
-import numpy as np
-import multiprocessing
-from joblib import Parallel, delayed
+lst = [10, 50, 75, 83, 98, 84, 32]
 
-global_var = np.zeros(10)
+for x in range(len(lst)):
+    print(lst[x])
 
-
-def populate(idx):
-    print('I am core', idx, '\'')
-    global_var[idx] = idx
-
-
-num_cores = multiprocessing.cpu_count()
-Parallel(n_jobs=num_cores, require='sharedmem')(delayed(populate)(idx) for idx in range(len(global_var)))
-
-print(global_var)
