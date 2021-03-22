@@ -1,12 +1,13 @@
 import time
+import nolds
 import random
 import sqlite3
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import multiprocessing
-# from p_tqdm import p_map
 from numpy import nan
+# from p_tqdm import p_map
 from datetime import datetime
 from pandas import concat, DataFrame
 from joblib import Parallel, delayed
@@ -170,7 +171,7 @@ def calculate_missing_values_dataframe(ts_wmv, years_list, random_system_name, t
         count = 0
         for index_val, series_val in ts_wmv.iteritems():
             if (int(missing_values_df['Start_Year_Range'][i]) <= index_val.year <=
-                    int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
+                int(missing_values_df['Stop_Year_Range'][i])) and (series_val > 0):
                 count = count + 1
         missing_values_df.iloc[i, missing_values_df.columns.get_loc('Non_Zero_values')] = count
 
@@ -282,9 +283,10 @@ def check_eligible_range_for_month(initial_df, random_system_name):
 
 
 def create_random_cs_system_dataset(idx, seed):
-    print("Start creation of random closed source system " + str(idx) + "...")
+    print("Start creation of random closed source system " + str(idx + 1) + "...")
 
     # Create a SQL connection to SQLite database
+    # con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
     con = sqlite3.connect('C:\\Users\\lumi\\Dropbox\\unipi\\paper_NVD_forcasting\\sqlight_db\\nvd_nist.db')
     # prepare the lists of sequences
     closed_source_os_sequence = ['%microsoft%windows%']
@@ -298,8 +300,6 @@ def create_random_cs_system_dataset(idx, seed):
                                   '%avast%', '%f%secure%', '%sophos%']
 
     # Make random closed source system datasets
-    # for x in range(1, 501):
-    print("Doing system " + str(idx))
     # Select a subset without replacement
     random.seed(seed)
     subset_volatile_services_sequence = random.sample(volatile_services_sequence, 7)
@@ -327,20 +327,21 @@ def create_random_cs_system_dataset(idx, seed):
         initial_df = initial_df.reset_index()
 
     # First check for day
-    status_true, pd_ts = check_eligible_range_for_day(initial_df, ("random_system_" + str(idx)))
+    status_true, pd_ts = check_eligible_range_for_day(initial_df, ("random_system_" + str(idx + 1)))
     if status_true:
         return pd_ts
 
     # If day fails then check for week
-    status_true, pd_ts = check_eligible_range_for_week(initial_df, ("random_system_" + str(idx)))
+    status_true, pd_ts = check_eligible_range_for_week(initial_df, ("random_system_" + str(idx + 1)))
     if status_true:
         return pd_ts
 
     # If week fails check for month
-    status_true, pd_ts = check_eligible_range_for_month(initial_df, ("random_system_" + str(idx)))
+    status_true, pd_ts = check_eligible_range_for_month(initial_df, ("random_system_" + str(idx + 1)))
     if status_true:
         return pd_ts
 
+    # ts_wmv_week.to_csv(r'data/datasets/' + table_name + '_week.csv', index_label='index', header=['values'])
     # Close connection when done
     con.close()
 
@@ -348,9 +349,10 @@ def create_random_cs_system_dataset(idx, seed):
 
 
 def create_random_os_system_dataset(idx, seed):
-    print("Start creation of random closed source system " + str(idx) + "...")
+    print("Start creation of random open source system " + str(idx + 1) + "...")
 
     # Create a SQL connection to SQLite database
+    # con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
     con = sqlite3.connect('C:\\Users\\lumi\\Dropbox\\unipi\\paper_NVD_forcasting\\sqlight_db\\nvd_nist.db')
     # prepare the lists of sequences
     open_source_os_sequence = ['%ubuntu%', '%debian%', '%redhat%', '%centos%', '%fedora%']
@@ -365,8 +367,6 @@ def create_random_os_system_dataset(idx, seed):
                                   '%avast%', '%f%secure%', '%sophos%']
 
     # Make random closed source system datasets
-    # for x in range(1, 501):
-    print("Doing system " + str(idx))
     # Select a subset without replacement
     random.seed(seed)
     subset_open_source_os_sequence = random.sample(open_source_os_sequence, 1)
@@ -395,17 +395,17 @@ def create_random_os_system_dataset(idx, seed):
         initial_df = initial_df.reset_index()
 
     # First check for day
-    status_true, pd_ts = check_eligible_range_for_day(initial_df, ("random_system_" + str(idx)))
+    status_true, pd_ts = check_eligible_range_for_day(initial_df, ("random_system_" + str(idx + 1)))
     if status_true:
         return pd_ts
 
     # If day fails then check for week
-    status_true, pd_ts = check_eligible_range_for_week(initial_df, ("random_system_" + str(idx)))
+    status_true, pd_ts = check_eligible_range_for_week(initial_df, ("random_system_" + str(idx + 1)))
     if status_true:
         return pd_ts
 
     # If week fails check for month
-    status_true, pd_ts = check_eligible_range_for_month(initial_df, ("random_system_" + str(idx)))
+    status_true, pd_ts = check_eligible_range_for_month(initial_df, ("random_system_" + str(idx + 1)))
     if status_true:
         return pd_ts
 
@@ -415,29 +415,82 @@ def create_random_os_system_dataset(idx, seed):
     return None
 
 
+def perform_random_system_lles_calc(idx, system_type, system):
+    print("Perform lyapunov exponent calculations of random " + system_type + " system " + str(idx + 1) + "...")
+    # load results dataframe
+    lyapunov_exps_df = pd.read_csv('data/chaos_data/base_data_lles.csv')
+    lyapunov_exps_df = lyapunov_exps_df.set_index(['trajectory_len', 'emb_dim', 'min_neighbors', 'lag']).sort_index()
+    # load data
+    x = system.values
+    x = x.astype('float32')
+    # x = np.fromiter(cs_system.values, dtype="float32")
+
+    # Perform the calculation and put it on the above created dataframe
+    for idx_vals, values in lyapunov_exps_df['value'].iteritems():
+        lyapunov_exps_df.at[(int(idx_vals[0]), int(idx_vals[1]), int(idx_vals[2]), int(idx_vals[3])), 'value'] = \
+            nolds.lyap_r(x, emb_dim=int(idx_vals[1]), lag=int(idx_vals[3]), min_tsep=None,
+                         min_neighbors=int(idx_vals[2]), trajectory_len=int(idx_vals[0]))
+
+    return lyapunov_exps_df
+
+
+def perform_random_system_he_calc(idx, system_type, system):
+    print("Perform lyapunov exponent calculations of random " + system_type + " system " + str(idx + 1) + "...")
+    # load results dataframe
+    hurst_exp_df = pd.read_csv('data/chaos_data/base_data_he.csv')
+    hurst_exp_df = hurst_exp_df.set_index('index')
+    # load data
+    x = system.values
+    x = x.astype('float32')
+    # x = np.fromiter(series.values, dtype="float32")
+
+    for row_index, row_val in hurst_exp_df.iterrows():
+        hurst_exp_df.at[(int(row_index)), 'value'] = nolds.hurst_rs(x)
+
+    return hurst_exp_df
+
+
 # ======================================================================================================================
 # Main function
 # ======================================================================================================================
+# noinspection PyTypeChecker
 def main():
     print("Welcome to Calchas chaos generalization...")
 
     num_cores = multiprocessing.cpu_count()
-    seed_table = [0] * 500
+    seed_table = [0] * 1  # 500
     for x in range(len(seed_table)):
         time.sleep(0.5)
         seed_table[x] = datetime.now()
 
-    cs_systems_list = Parallel(n_jobs=num_cores)(delayed(create_random_cs_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
+    cs_systems_list = Parallel(n_jobs=num_cores) \
+        (delayed(create_random_cs_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
 
-    print(cs_systems_list)
-
-    seed_table = [0] * 500
+    seed_table = [0] * 1  # 500
     for x in range(len(seed_table)):
         time.sleep(0.5)
         seed_table[x] = datetime.now()
 
-    os_systems_list = Parallel(n_jobs=num_cores)(delayed(create_random_os_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
-    print(os_systems_list)
+    os_systems_list = Parallel(n_jobs=num_cores) \
+        (delayed(create_random_os_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
+
+    # Perform lyapunov exponent calculations
+    lyapunov_lles_cs_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_lles_calc)
+                                                          (idx, "closed source", cs_system) for idx, cs_system
+                                                          in tqdm(enumerate(cs_systems_list)))
+    lyapunov_lles_os_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_lles_calc)
+                                                          (idx, "open source", os_system) for idx, os_system
+                                                          in tqdm(enumerate(os_systems_list)))
+
+    # Perform hurst exponent calculations
+    hurst_exponent_cs_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_he_calc)
+                                                           (idx, "closed source", cs_system) for idx, cs_system
+                                                           in tqdm(enumerate(cs_systems_list)))
+    hurst_exponent_os_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_he_calc)
+                                                           (idx, "open source", os_system) for idx, os_system
+                                                           in tqdm(enumerate(os_systems_list)))
+
+    # Perform sample entropy calculations
 
 
 if __name__ == "__main__":
