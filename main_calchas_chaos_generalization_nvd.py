@@ -1,6 +1,7 @@
 import time
 import nolds
 import random
+import pickle
 import sqlite3
 import numpy as np
 import pandas as pd
@@ -286,8 +287,7 @@ def create_random_cs_system_dataset(idx, seed):
     print("Start creation of random closed source system " + str(idx + 1) + "...")
 
     # Create a SQL connection to SQLite database
-    # con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
-    con = sqlite3.connect('C:\\Users\\lumi\\Dropbox\\unipi\\paper_NVD_forcasting\\sqlight_db\\nvd_nist.db')
+    con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
     # prepare the lists of sequences
     closed_source_os_sequence = ['%microsoft%windows%']
     volatile_services_sequence = ['%iptables%', '%ntp%', '%fail2ban%', '%mysql%', '%mongodb%', '%postgres%',
@@ -341,7 +341,6 @@ def create_random_cs_system_dataset(idx, seed):
     if status_true:
         return pd_ts
 
-    # ts_wmv_week.to_csv(r'data/datasets/' + table_name + '_week.csv', index_label='index', header=['values'])
     # Close connection when done
     con.close()
 
@@ -352,8 +351,7 @@ def create_random_os_system_dataset(idx, seed):
     print("Start creation of random open source system " + str(idx + 1) + "...")
 
     # Create a SQL connection to SQLite database
-    # con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
-    con = sqlite3.connect('C:\\Users\\lumi\\Dropbox\\unipi\\paper_NVD_forcasting\\sqlight_db\\nvd_nist.db')
+    con = sqlite3.connect("/home/lumi/Dropbox/unipi/paper_NVD_forcasting/sqlight_db/nvd_nist.db")
     # prepare the lists of sequences
     open_source_os_sequence = ['%ubuntu%', '%debian%', '%redhat%', '%centos%', '%fedora%']
     open_source_permanent_services_sequence = ['%linux_kernel:%']
@@ -418,7 +416,7 @@ def create_random_os_system_dataset(idx, seed):
 def perform_random_system_lles_calc(idx, system_type, system):
     print("Perform lyapunov exponent calculations of random " + system_type + " system " + str(idx + 1) + "...")
     # load results dataframe
-    lyapunov_exps_df = pd.read_csv('data/chaos_data/base_data_lles.csv')
+    lyapunov_exps_df = pd.read_csv('data/chaos_data/base_data_lle.csv')
     lyapunov_exps_df = lyapunov_exps_df.set_index(['trajectory_len', 'emb_dim', 'min_neighbors', 'lag']).sort_index()
     # load data
     x = system.values
@@ -444,10 +442,45 @@ def perform_random_system_he_calc(idx, system_type, system):
     x = x.astype('float32')
     # x = np.fromiter(series.values, dtype="float32")
 
+    # Perform the calculation and put it on the above created dataframe
     for row_index, row_val in hurst_exp_df.iterrows():
         hurst_exp_df.at[(int(row_index)), 'value'] = nolds.hurst_rs(x)
 
     return hurst_exp_df
+
+
+def perform_random_system_se_calc(idx, system_type, system):
+    print("Perform sample entropy calculations of random " + system_type + " system " + str(idx + 1) + "...")
+    # load results dataframe
+    sample_entropy_df = pd.read_csv('data/chaos_data/base_data_se.csv')
+    sample_entropy_df = sample_entropy_df.set_index('emb_dim')
+    print()
+    # load data
+    x = system.values
+    x = x.astype('float32')
+    # x = np.fromiter(series.values, dtype="float32")
+
+    # Perform the calculation and put it on the above created dataframe
+    for row_index, row_val in sample_entropy_df.iterrows():
+        sample_entropy_df.at[(int(row_index)), 'value'] = nolds.sampen(x, emb_dim=row_index, tolerance=None)
+
+    return sample_entropy_df
+
+
+def save_data(data_list, file_name):
+    with open("data/chaos_data/" + file_name + ".dat", "wb") as fp:
+        pickle.dump(data_list, fp)
+
+
+# noinspection PyBroadException
+def load_data(file_name):
+    try:
+        with open("data/chaos_data/" + file_name + ".dat", "rb") as fp:
+            data_list = pickle.load(fp)
+    except:
+        data_list = []
+
+    return data_list
 
 
 # ======================================================================================================================
@@ -458,40 +491,56 @@ def main():
     print("Welcome to Calchas chaos generalization...")
 
     num_cores = multiprocessing.cpu_count()
-    seed_table = [0] * 1  # 500
+    seed_table = [0] * 500  # 500
     for x in range(len(seed_table)):
         time.sleep(0.5)
         seed_table[x] = datetime.now()
 
     cs_systems_list = Parallel(n_jobs=num_cores) \
-        (delayed(create_random_cs_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
+        (delayed(create_random_cs_system_dataset)(idx, seed) for idx, seed in enumerate(tqdm(seed_table)))
+    save_data(cs_systems_list, "cs_systems_list")
 
-    seed_table = [0] * 1  # 500
+    seed_table = [0] * 500  # 500
     for x in range(len(seed_table)):
         time.sleep(0.5)
         seed_table[x] = datetime.now()
 
     os_systems_list = Parallel(n_jobs=num_cores) \
-        (delayed(create_random_os_system_dataset)(idx, seed) for idx, seed in tqdm(enumerate(seed_table)))
+        (delayed(create_random_os_system_dataset)(idx, seed) for idx, seed in enumerate(tqdm(seed_table)))
+    save_data(os_systems_list, "os_systems_list")
 
     # Perform lyapunov exponent calculations
     lyapunov_lles_cs_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_lles_calc)
                                                           (idx, "closed source", cs_system) for idx, cs_system
-                                                          in tqdm(enumerate(cs_systems_list)))
+                                                          in enumerate(tqdm(cs_systems_list)))
+    save_data(lyapunov_lles_cs_df_list, "lyapunov_lles_cs_df_list")
     lyapunov_lles_os_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_lles_calc)
                                                           (idx, "open source", os_system) for idx, os_system
-                                                          in tqdm(enumerate(os_systems_list)))
+                                                          in enumerate(tqdm(os_systems_list)))
+    save_data(lyapunov_lles_os_df_list, "lyapunov_lles_os_df_list")
 
     # Perform hurst exponent calculations
     hurst_exponent_cs_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_he_calc)
                                                            (idx, "closed source", cs_system) for idx, cs_system
-                                                           in tqdm(enumerate(cs_systems_list)))
+                                                           in enumerate(tqdm(cs_systems_list)))
+    save_data(hurst_exponent_cs_df_list, "hurst_exponent_cs_df_list")
     hurst_exponent_os_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_he_calc)
                                                            (idx, "open source", os_system) for idx, os_system
-                                                           in tqdm(enumerate(os_systems_list)))
+                                                           in enumerate(tqdm(os_systems_list)))
+    save_data(hurst_exponent_os_df_list, "hurst_exponent_os_df_list")
 
     # Perform sample entropy calculations
+    perform_random_system_se_calc(0, "closed source", cs_systems_list[0])
+    sample_entropy_cs_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_se_calc)
+                                                           (idx, "closed source", cs_system) for idx, cs_system
+                                                           in enumerate(tqdm(cs_systems_list)))
+    save_data(sample_entropy_cs_df_list, "sample_entropy_cs_df_list")
+    sample_entropy_os_df_list = Parallel(n_jobs=num_cores)(delayed(perform_random_system_se_calc)
+                                                           (idx, "open source", os_system) for idx, os_system
+                                                           in enumerate(tqdm(os_systems_list)))
+    save_data(sample_entropy_os_df_list, "sample_entropy_os_df_list")
 
+    print()
 
 if __name__ == "__main__":
     main()

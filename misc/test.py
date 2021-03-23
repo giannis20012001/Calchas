@@ -1,7 +1,7 @@
 import pandas as pd
 
 # load data
-lyapunov_df = pd.read_csv('../data/chaos_data/base_data_lles.csv')
+lyapunov_df = pd.read_csv('../data/chaos_data/base_data_lle.csv')
 lyapunov_df = lyapunov_df.set_index(['trajectory_len', 'emb_dim', 'min_neighbors', 'lag']).sort_index()
 lyapunov_df.at[(6, 3, 2, 1), 'value'] = 45
 
