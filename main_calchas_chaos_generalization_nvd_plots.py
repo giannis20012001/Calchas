@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 
@@ -23,15 +24,103 @@ def load_data(file_name):
     return data_list
 
 
+def create_heatmap():
+    my_colors = [(0.2, 0.3, 0.3), (0.4, 0.5, 0.4), (0.1, 0.7, 0), (0.1, 0.7, 0)]
+    df_lp_cs_list = load_data("lyapunov_lles_cs_df_list")
+    df_lp_os_list = load_data("lyapunov_lles_os_df_list")
+
+    fig, ax = plt.subplots(figsize=(20, 15))
+    df_lp_concat_cs_list = pd.concat(df_lp_cs_list, axis=1)
+    df_lp_concat_cs_list.columns = ["%d" % i for i, _ in enumerate(df_lp_concat_cs_list.columns)]
+    sns.heatmap(df_lp_concat_cs_list, ax=ax, cmap=my_colors, linewidths=.5)  # cmap = "YlGnBu" or cmap="RdYlGn"
+    fig.savefig('data/chaos_data/df_lp_concat_cs_list_heatmap.pdf', dpi=300)
+
+    fig, ax = plt.subplots(figsize=(20, 15))
+    df_lp_concat_os_list = pd.concat(df_lp_os_list, axis=1)
+    df_lp_concat_os_list.columns = ["%d" % i for i, _ in enumerate(df_lp_concat_os_list.columns)]
+    sns.heatmap(df_lp_concat_os_list, ax=ax, cmap=my_colors, linewidths=.5)  # cmap = "YlGnBu" or cmap="RdYlGn"
+    plt.show()
+    fig.savefig('data/chaos_data/df_lp_concat_os_list_heatmap.pdf', dpi=300)
+
+
+def calculate_lle_stats():
+    df_lp_cs_list = load_data("lyapunov_lles_cs_df_list")
+    df_lp_os_list = load_data("lyapunov_lles_os_df_list")
+    df_lp_concat_cs_list = pd.concat(df_lp_cs_list, axis=1)
+    df_lp_concat_cs_list.columns = ["%d" % i for i, _ in enumerate(df_lp_concat_cs_list.columns)]
+    df_lp_concat_os_list = pd.concat(df_lp_os_list, axis=1)
+    df_lp_concat_os_list.columns = ["%d" % i for i, _ in enumerate(df_lp_concat_os_list.columns)]
+    non_negative_values_cs = df_lp_concat_cs_list.where(df_lp_concat_cs_list > 0.0).count().sum()
+    non_negative_values_os = df_lp_concat_os_list.where(df_lp_concat_os_list > 0.0).count().sum()
+    print("Total values for cs: " + str(500 * 144))
+    print("Non negative values for cs: " + str(non_negative_values_cs))
+    print("Percentage: " + str((non_negative_values_cs * 100) / 72000))
+    print("Total values for os: " + str(500 * 144))
+    print("Non negative values for os: " + str(non_negative_values_os))
+    print("Percentage: " + str((non_negative_values_os * 100) / 72000))
+
+
+def calculate_he_ranges_stats():
+    df_he_cs_list = load_data("hurst_exponent_cs_df_list")
+    df_he_os_list = load_data("hurst_exponent_os_df_list")
+    df_he_concat_cs_list = pd.concat(df_he_cs_list)
+    df_he_concat_cs_list.reset_index(inplace=True, drop=True)
+    df_he_concat_cs_list = df_he_concat_cs_list.rename(columns={'value': 'a'})
+    df_he_concat_os_list = pd.concat(df_he_os_list)
+    df_he_concat_os_list.reset_index(inplace=True, drop=True)
+    df_he_concat_os_list = df_he_concat_os_list.rename(columns={'value': 'a'})
+    ranges = [0, 0.20, 0.60, 1]
+    range_vals_cs = df_he_concat_cs_list.groupby(pd.cut(df_he_concat_cs_list.a, ranges)).count()
+    range_vals_os = df_he_concat_os_list.groupby(pd.cut(df_he_concat_os_list.a, ranges)).count()
+    print("HE ranges stats for cs: ")
+    print(range_vals_cs)
+    print("HE ranges stats for os: ")
+    print(range_vals_os)
+
+
+def calculate_se_histogram():
+    df_se_cs_list = load_data("sample_entropy_cs_df_list")
+    df_se_os_list = load_data("sample_entropy_os_df_list")
+
+    df_se_concat_cs_list = pd.concat(df_se_cs_list)
+    df_se_concat_cs_list.reset_index(inplace=True, drop=True)
+    df_se_concat_cs_list = df_se_concat_cs_list.rename(columns={'value': 'a'})
+    df_se_concat_cs_list = df_se_concat_cs_list.replace([np.inf, -np.inf], np.nan)
+
+    df_se_concat_os_list = pd.concat(df_se_os_list)
+    df_se_concat_os_list.reset_index(inplace=True, drop=True)
+    df_se_concat_os_list = df_se_concat_os_list.rename(columns={'value': 'a'})
+    df_se_concat_os_list = df_se_concat_os_list.replace([np.inf, -np.inf], np.nan)
+
+    df_se_concat_cs_list.hist()
+    plt.xlabel('Sample entropy bin values')
+    plt.ylabel('Frequency')
+    plt.title('Sample entropy Histogram for closed source systems')
+    plt.savefig('data/chaos_data/df_se_concat_cs_list_hist.pdf', dpi=300)
+    plt.show()
+
+    df_se_concat_os_list.hist()
+    plt.xlabel('Sample entropy bin values')
+    plt.ylabel('Frequency')
+    plt.title('Sample entropy Histogram for open source systems')
+    plt.savefig('data/chaos_data/df_se_concat_os_list_hist.pdf', dpi=300)
+    plt.show()
+
+
 # ======================================================================================================================
 # Main function
 # ======================================================================================================================
 # noinspection PyTypeChecker
 def main():
     print("Welcome to Calchas chaos generalization plot creation...")
-    df_list = load_data("lyapunov_lles_cs_df_list")
-
-    print()
+    # Generate heatmap
+    create_heatmap()
+    # LLEs
+    calculate_lle_stats()
+    # Hurst exponent
+    calculate_he_ranges_stats()
+    # Sample entropy
+    calculate_se_histogram()
 
 
 if __name__ == "__main__":

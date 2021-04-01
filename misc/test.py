@@ -1,9 +1,46 @@
+import pickle
 import numpy as np
 import pandas as pd
-import seaborn as sb
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-data = np.random.rand(4, 6)
-heat_map = sb.heatmap(data)
-plt.show()
+# ======================================================================================================================
+# Functions space
+# ======================================================================================================================
+def save_data(data_list, file_name):
+    with open("data/chaos_data/" + file_name + ".dat", "wb") as fp:
+        pickle.dump(data_list, fp)
+
+
+# noinspection PyBroadException
+def load_data(file_name):
+    try:
+        with open("../data/chaos_data/" + file_name + ".dat", "rb") as fp:
+            data_list = pickle.load(fp)
+    except:
+        data_list = []
+
+    return data_list
+
+
+# ======================================================================================================================
+# Main function
+# ======================================================================================================================
+# noinspection PyTypeChecker
+def main():
+    df_he_cs_list = load_data("hurst_exponent_cs_df_list")
+    df_he_os_list = load_data("hurst_exponent_os_df_list")
+
+    df_he_concat_cs_list = pd.concat(df_he_cs_list, axis=1)
+    df_he_concat_cs_list.columns = ["%d" % i for i, _ in enumerate(df_he_concat_cs_list.columns)]
+    ranges = [0, 0.20, 0.60, 1]
+    df_he_concat_cs_list.groupby(pd.cut(df_he_concat_cs_list.a, ranges)).count()
+
+    df_he_concat_os_list = pd.concat(df_he_os_list, axis=1)
+    df_he_concat_os_list.columns = ["%d" % i for i, _ in enumerate(df_he_concat_os_list.columns)]
+    print()
+
+
+if __name__ == "__main__":
+    main()
