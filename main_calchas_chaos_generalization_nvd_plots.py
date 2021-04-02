@@ -107,6 +107,26 @@ def calculate_se_histogram():
     plt.show()
 
 
+def df_count_freq(df, thresh=0):
+    # count how many are greater than a threshold `thresh` per row
+    c = df.gt(thresh).sum(1)
+
+    # find where `counts` are > `0` for both dataframes
+    # conveniently dropped into one dataframe so we can do
+    # this nifty `groupby` trick
+    mask = c.gt(0).groupby(level=[1, 2]).transform('all')
+    #                                    \-------/
+    #                         This is key to broadcasting over
+    #                         original index rather than collapsing
+    #                         over the index levels we grouped by
+
+    #     create a new column named `counts`
+    #         /------------\
+    return df.assign(counts=c)[mask]
+    #                         \--/
+    #                    filter with boolean mask
+
+
 # ======================================================================================================================
 # Main function
 # ======================================================================================================================
@@ -114,14 +134,31 @@ def calculate_se_histogram():
 def main():
     print("Welcome to Calchas chaos generalization plot creation...")
     # Generate heatmap
-    create_heatmap()
+    # create_heatmap()
     # LLEs
-    calculate_lle_stats()
+    # calculate_lle_stats()
     # Hurst exponent
-    calculate_he_ranges_stats()
+    # calculate_he_ranges_stats()
     # Sample entropy
-    calculate_se_histogram()
+    # calculate_se_histogram()
+    df_lp_cs_list = load_data("lyapunov_lles_cs_df_list")
+    df_lp_os_list = load_data("lyapunov_lles_os_df_list")
 
+    df_lp_concat_cs_list = pd.concat(df_lp_cs_list, axis=1)
+    df_lp_concat_cs_list.columns = ["%d" % i for i, _ in enumerate(df_lp_concat_cs_list.columns)]
+
+    df_lp_concat_os_list = pd.concat(df_lp_os_list, axis=1)
+    df_lp_concat_os_list.columns = ["%d" % i for i, _ in enumerate(df_lp_concat_os_list.columns)]
+
+    df_count_freq_cs = df_count_freq(df_lp_concat_cs_list)
+    df_count_freq_cs = df_count_freq_cs.sort_values('counts', ascending=False)
+    final_df_count_freq_cs = df_count_freq_cs.filter(['counts'], axis=1)
+
+    df_count_freq_os = df_count_freq(df_lp_concat_os_list)
+    df_count_freq_os = df_count_freq_os.sort_values('counts', ascending=False)
+    final_df_count_freq_os = df_count_freq_os.filter(['counts'], axis=1)
+    print(final_df_count_freq_cs)
+    print(final_df_count_freq_os)
 
 if __name__ == "__main__":
     main()
