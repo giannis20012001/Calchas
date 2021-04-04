@@ -30,7 +30,7 @@ green_fill = PatternFill(start_color='0000FF00', end_color='0000FF00', fill_type
 for sheet in worksheets:
     # Activate worksheet to write dataframe
     active = workbook[sheet]
-    active.conditional_formatting.add('B3:M22', CellIsRule(operator='greaterThan', formula=[0.2], fill=green_fill))
+    # active.conditional_formatting.add('B3:M22', CellIsRule(operator='greaterThan', formula=[0.2], fill=green_fill))
 
     # load dataset
     series = read_csv('../data/datasets/' + sheet + '_final_week.csv',
