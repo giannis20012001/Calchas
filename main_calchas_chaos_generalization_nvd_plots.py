@@ -127,20 +127,7 @@ def df_count_freq(df, thresh=0):
     #                    filter with boolean mask
 
 
-# ======================================================================================================================
-# Main function
-# ======================================================================================================================
-# noinspection PyTypeChecker
-def main():
-    print("Welcome to Calchas chaos generalization plot creation...")
-    # Generate heatmap
-    # create_heatmap()
-    # LLEs
-    # calculate_lle_stats()
-    # Hurst exponent
-    # calculate_he_ranges_stats()
-    # Sample entropy
-    # calculate_se_histogram()
+def df_lle_positive_count():
     df_lp_cs_list = load_data("lyapunov_lles_cs_df_list")
     df_lp_os_list = load_data("lyapunov_lles_os_df_list")
 
@@ -157,8 +144,32 @@ def main():
     df_count_freq_os = df_count_freq(df_lp_concat_os_list)
     df_count_freq_os = df_count_freq_os.sort_values('counts', ascending=False)
     final_df_count_freq_os = df_count_freq_os.filter(['counts'], axis=1)
-    print(final_df_count_freq_cs)
-    print(final_df_count_freq_os)
+
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+        print(final_df_count_freq_cs)
+        print(final_df_count_freq_os)
+
+
+# ======================================================================================================================
+# Main function
+# ======================================================================================================================
+# noinspection PyTypeChecker
+def main():
+    print("Welcome to Calchas chaos generalization plot creation...")
+    # Generate heatmap
+    # create_heatmap()
+
+    # LLEs
+    # calculate_lle_stats()
+
+    # Hurst exponent
+    # calculate_he_ranges_stats()
+
+    # Sample entropy
+    # calculate_se_histogram()
+
+    # Display dimensions for positive LLEs count for all systems
+    df_lle_positive_count()
 
 
 if __name__ == "__main__":
