@@ -96,6 +96,7 @@ def calculate_se_histogram():
     plt.xlabel('Sample entropy bin values')
     plt.ylabel('Frequency')
     plt.title('Sample entropy Histogram for closed source systems')
+    # plt.savefig('data/chaos_data/df_se_concat_cs_list_hist.png', dpi=300)
     plt.savefig('data/chaos_data/df_se_concat_cs_list_hist.pdf', dpi=300)
     plt.show()
 
@@ -103,6 +104,7 @@ def calculate_se_histogram():
     plt.xlabel('Sample entropy bin values')
     plt.ylabel('Frequency')
     plt.title('Sample entropy Histogram for open source systems')
+    # plt.savefig('data/chaos_data/df_se_concat_os_list_hist.png', dpi=300)
     plt.savefig('data/chaos_data/df_se_concat_os_list_hist.pdf', dpi=300)
     plt.show()
 

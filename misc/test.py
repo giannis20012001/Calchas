@@ -42,7 +42,9 @@ def main():
     # df_he_concat_os_list.columns = ["%d" % i for i, _ in enumerate(df_he_concat_os_list.columns)]
     lm = nolds.logistic_map(0.1, 1000, r=4)
     x = np.fromiter(lm, dtype="float32")
-    print(nolds.sampen(x,  emb_dim=2, tolerance=None))
+    print(nolds.sampen(x,  emb_dim=3, tolerance=None))
+    print(nolds.sampen(x, emb_dim=5, tolerance=None))
+    print(nolds.sampen(x, emb_dim=7, tolerance=None))
 
 
 if __name__ == "__main__":
