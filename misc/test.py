@@ -1,4 +1,5 @@
 import pickle
+import nolds
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -29,17 +30,19 @@ def load_data(file_name):
 # ======================================================================================================================
 # noinspection PyTypeChecker
 def main():
-    df_he_cs_list = load_data("hurst_exponent_cs_df_list")
-    df_he_os_list = load_data("hurst_exponent_os_df_list")
-
-    df_he_concat_cs_list = pd.concat(df_he_cs_list, axis=1)
-    df_he_concat_cs_list.columns = ["%d" % i for i, _ in enumerate(df_he_concat_cs_list.columns)]
-    ranges = [0, 0.20, 0.60, 1]
-    df_he_concat_cs_list.groupby(pd.cut(df_he_concat_cs_list.a, ranges)).count()
-
-    df_he_concat_os_list = pd.concat(df_he_os_list, axis=1)
-    df_he_concat_os_list.columns = ["%d" % i for i, _ in enumerate(df_he_concat_os_list.columns)]
-    print()
+    # df_he_cs_list = load_data("hurst_exponent_cs_df_list")
+    # df_he_os_list = load_data("hurst_exponent_os_df_list")
+    #
+    # df_he_concat_cs_list = pd.concat(df_he_cs_list, axis=1)
+    # df_he_concat_cs_list.columns = ["%d" % i for i, _ in enumerate(df_he_concat_cs_list.columns)]
+    # ranges = [0, 0.20, 0.60, 1]
+    # df_he_concat_cs_list.groupby(pd.cut(df_he_concat_cs_list.a, ranges)).count()
+    #
+    # df_he_concat_os_list = pd.concat(df_he_os_list, axis=1)
+    # df_he_concat_os_list.columns = ["%d" % i for i, _ in enumerate(df_he_concat_os_list.columns)]
+    lm = nolds.logistic_map(0.1, 1000, r=4)
+    x = np.fromiter(lm, dtype="float32")
+    print(nolds.sampen(x,  emb_dim=2, tolerance=None))
 
 
 if __name__ == "__main__":

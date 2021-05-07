@@ -69,7 +69,7 @@ def calculate_he_ranges_stats():
     df_he_concat_os_list = pd.concat(df_he_os_list)
     df_he_concat_os_list.reset_index(inplace=True, drop=True)
     df_he_concat_os_list = df_he_concat_os_list.rename(columns={'value': 'a'})
-    ranges = [0, 0.20, 0.60, 1]
+    ranges = [0, 0.40, 0.49, 0.51, 0.60, 1]
     range_vals_cs = df_he_concat_cs_list.groupby(pd.cut(df_he_concat_cs_list.a, ranges)).count()
     range_vals_os = df_he_concat_os_list.groupby(pd.cut(df_he_concat_os_list.a, ranges)).count()
     print("HE ranges stats for cs: ")
@@ -150,12 +150,40 @@ def df_lle_positive_count():
         print(final_df_count_freq_os)
 
 
+def count_total_data_per_system():
+    cs_list = load_data("cs_systems_list")
+    os_list = load_data("os_systems_list")
+    total_elem_count_per_cs_system = []
+    total_elem_count_per_os_system = []
+
+    # Iterate over the list and count all elements per internal list for closed source
+    for listElem in cs_list:
+        total_elem_count_per_cs_system.append(len(listElem))
+
+    df_total_elem_count_per_cs_system = pd.DataFrame(total_elem_count_per_cs_system)
+
+    # Iterate over the list and count all elements per internal list for open source
+    for listElem in os_list:
+        total_elem_count_per_os_system.append(len(listElem))
+    df_total_elem_count_per_os_system = pd.DataFrame(total_elem_count_per_os_system)
+
+    # save_data(total_elem_count_per_cs_system, "total_elem_count_per_cs_system")
+    # save_data(total_elem_count_per_os_system, "total_elem_count_per_os_system")
+
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+        print(df_total_elem_count_per_cs_system)
+        print(df_total_elem_count_per_os_system)
+
+
 # ======================================================================================================================
 # Main function
 # ======================================================================================================================
 # noinspection PyTypeChecker
 def main():
     print("Welcome to Calchas chaos generalization plot creation...")
+    # Count total data per system
+    # count_total_data_per_system()
+
     # Generate heatmap
     # create_heatmap()
 
@@ -169,7 +197,7 @@ def main():
     # calculate_se_histogram()
 
     # Display dimensions for positive LLEs count for all systems
-    df_lle_positive_count()
+    # df_lle_positive_count()
 
 
 if __name__ == "__main__":
